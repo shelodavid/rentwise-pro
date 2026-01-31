@@ -1,0 +1,164 @@
+@model RentWisePro.Web.Models.PurchaseSheetPageVm
+@{
+    ViewData["Title"] = "Purchase Sheet";
+}
+
+<div class="mb-4">
+    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Back to Listings</a>
+</div>
+
+<div class="row g-4 align-items-start mb-4">
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            @if (!string.IsNullOrWhiteSpace(Model.ImgSrc))
+            {
+                <img src="@Model.ImgSrc" class="card-img-top" alt="Listing image" />
+            }
+            <div class="card-body">
+                <h4 class="card-title mb-1">@Model.StreetAddress</h4>
+                <p class="text-muted">@Model.City, @Model.State @Model.ZipCode</p>
+                <div class="mb-2"><strong>Price:</strong> @(Model.Price.HasValue ? Model.Price.Value.ToString("C") : "-")</div>
+                <div class="mb-2"><strong>Type:</strong> @Model.PropertyType</div>
+                <div class="mb-2"><strong>Beds/Baths:</strong> @(Model.Bedrooms?.ToString() ?? "-") / @(Model.Bathrooms?.ToString("0.0") ?? "-")</div>
+                <div><strong>Estimated Rent:</strong> @(Model.EstimatedRent.HasValue ? Model.EstimatedRent.Value.ToString("C") : "-")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Purchase Sheet</h3>
+                <p class="text-muted">Adjust assumptions to see updated cash-to-close and mortgage metrics.</p>
+                <form asp-action="GeneratePurchaseSheet" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Zpid" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="DownpaymentPercentage" class="form-label"></label>
+                            <input asp-for="DownpaymentPercentage" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="DownpaymentPercentage" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="MortgageInterestRate" class="form-label"></label>
+                            <input asp-for="MortgageInterestRate" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="MortgageInterestRate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="TermYears" class="form-label"></label>
+                            <input asp-for="TermYears" class="form-control" type="number" />
+                            <span asp-validation-for="TermYears" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ClosingCostOverride" class="form-label"></label>
+                            <input asp-for="ClosingCostOverride" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="ClosingCostOverride" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="RenovationBudget" class="form-label"></label>
+                            <input asp-for="RenovationBudget" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="RenovationBudget" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="OtherUpfrontCosts" class="form-label"></label>
+                            <input asp-for="OtherUpfrontCosts" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="OtherUpfrontCosts" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <h5>Computed Outputs</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Downpayment Amount</span>
+                                    <strong>@Model.Outputs.DownpaymentAmount.ToString("C")</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Mortgage Amount</span>
+                                    <strong>@Model.Outputs.MortgageAmount.ToString("C")</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Monthly P&amp;I</span>
+                                    <strong>@Model.Outputs.MonthlyPrincipalAndInterest.ToString("C")</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Closing Costs (Calculated)</span>
+                                    <strong>@Model.Outputs.CalculatedClosingCosts.ToString("C")</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Total Closing Costs Used</span>
+                                    <strong>@Model.Outputs.TotalClosingCosts.ToString("C")</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Total Cash to Close</span>
+                                    <strong>@Model.Outputs.CashToClose.ToString("C")</strong>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <h5>Closing Cost Breakdown</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Base Closing Costs</span>
+                                    <span>@Model.ClosingCosts.ClosingCostsPercentage.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Realtor Fees</span>
+                                    <span>@Model.ClosingCosts.RealtorFees.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Loan Origination</span>
+                                    <span>@Model.ClosingCosts.LoanOriginationFee.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Appraisal</span>
+                                    <span>@Model.ClosingCosts.AppraisalFee.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Credit Report</span>
+                                    <span>@Model.ClosingCosts.CreditReportFee.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Title Insurance</span>
+                                    <span>@Model.ClosingCosts.TitleInsurance.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Title Search</span>
+                                    <span>@Model.ClosingCosts.TitleSearch.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Escrow Fee</span>
+                                    <span>@Model.ClosingCosts.EscrowFee.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Flood Inspection</span>
+                                    <span>@Model.ClosingCosts.FloodInspectionFee.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Miscellaneous Fees</span>
+                                    <span>@Model.ClosingCosts.MiscellaneousFees.ToString("C")</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>HOA Estimate</span>
+                                    <span>@Model.ClosingCosts.HoaEstimate.ToString("C")</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-lg">Update Purchase Sheet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
