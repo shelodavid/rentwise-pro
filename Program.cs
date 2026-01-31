@@ -8,6 +8,7 @@ var cs = builder.Configuration.GetConnectionString("RentWiseProDb");
 builder.Services.AddDbContext<RentWiseProDbContext>(options =>
     options.UseSqlServer(cs));
 
+builder.Services.AddScoped<ForecastCalculationService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
