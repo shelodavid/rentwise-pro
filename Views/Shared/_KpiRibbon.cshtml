@@ -1,0 +1,26 @@
+@model RentWisePro.Web.Models.Forecast.ForecastKpis
+
+<div class="kpi-ribbon" aria-label="Key performance indicators">
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">Monthly Cash Flow</div>
+            <div class="kpi-value">@Model.MonthlyCashflow.ToString("C0")</div>
+            <div class="text-muted small">Target positive</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Cash-on-Cash %</div>
+            <div class="kpi-value">@Model.CashOnCashReturnPercent.ToString("0.0")%</div>
+            <div class="text-muted small">Annual return</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Cap Rate %</div>
+            <div class="kpi-value">@Model.CapRatePercent.ToString("0.0")%</div>
+            <div class="text-muted small">NOI / Price</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">DSCR</div>
+            <div class="kpi-value">@Model.Dscr.ToString("0.00")</div>
+            <div class="text-muted small">Debt coverage</div>
+        </div>
+    </div>
+</div>

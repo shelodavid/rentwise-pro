@@ -1,0 +1,25 @@
+@{
+    var title = ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? string.Empty;
+    var subtitle = ViewData["PageSubtitle"] as string;
+    var meta = ViewData["PageMeta"] as string;
+    var actionLabel = ViewData["PageActionLabel"] as string;
+    var actionUrl = ViewData["PageActionUrl"] as string;
+}
+
+<div class="page-header">
+    <div>
+        @if (!string.IsNullOrWhiteSpace(meta))
+        {
+            <div class="text-muted text-uppercase small">@meta</div>
+        }
+        <h1 class="mb-0">@title</h1>
+        @if (!string.IsNullOrWhiteSpace(subtitle))
+        {
+            <p class="subtitle">@subtitle</p>
+        }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(actionLabel) && !string.IsNullOrWhiteSpace(actionUrl))
+    {
+        <a class="btn btn-primary" href="@actionUrl">@actionLabel</a>
+    }
+</div>
