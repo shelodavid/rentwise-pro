@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
+using RentWisePro.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<RentWiseProDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
 
