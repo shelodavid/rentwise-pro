@@ -1,4 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using RentWisePro.Web.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var cs = builder.Configuration.GetConnectionString("RentWiseProDb");
+builder.Services.AddDbContext<RentWiseProDbContext>(options =>
+    options.UseSqlServer(cs));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
