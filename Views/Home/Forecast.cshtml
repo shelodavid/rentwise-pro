@@ -1,0 +1,125 @@
+@model RentWisePro.Web.Models.Forecast.ForecastPageVm
+
+@{
+    ViewData["Title"] = "ROI Forecast";
+}
+
+<div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1">ROI Forecast</h1>
+        <p class="text-muted mb-0">@Model.Listing.AddressLine @if (!string.IsNullOrWhiteSpace(Model.Listing.LocationLine)) { <text>· @Model.Listing.LocationLine</text> }</p>
+        <div class="text-muted small">@Model.Listing.PropertyType @if (Model.Listing.Bedrooms.HasValue || Model.Listing.Bathrooms.HasValue) { <text>· </text> } @if (Model.Listing.Bedrooms.HasValue) { <text>@Model.Listing.Bedrooms bd</text> } @if (Model.Listing.Bedrooms.HasValue && Model.Listing.Bathrooms.HasValue) { <text> · </text> } @if (Model.Listing.Bathrooms.HasValue) { <text>@Model.Listing.Bathrooms ba</text> }</div>
+    </div>
+    <span class="badge bg-light text-dark border mt-3 mt-lg-0">ZPID @Model.Listing.Zpid</span>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Listing.ImgSrc))
+{
+    <div class="mb-4">
+        <img src="@Model.Listing.ImgSrc" alt="Listing image" class="img-fluid rounded shadow-sm" />
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small">Monthly Cashflow</div>
+                <div class="fs-4 fw-semibold">@Model.Kpis.MonthlyCashflow.ToString("C0")</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small">Cash-on-Cash Return</div>
+                <div class="fs-4 fw-semibold">@Model.Kpis.CashOnCashReturnPercent.ToString("0.0")%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small">Cap Rate</div>
+                <div class="fs-4 fw-semibold">@Model.Kpis.CapRatePercent.ToString("0.0")%</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small">DSCR</div>
+                <div class="fs-4 fw-semibold">@Model.Kpis.Dscr.ToString("0.00")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="fw-semibold">Assumptions</div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small text-uppercase">Purchase</div>
+                            <div class="d-flex justify-content-between"><span>Price</span><span>@Model.Listing.Price.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Down Payment</span><span>@Model.Assumptions.DownpaymentPercentage.ToString("0.0")%</span></div>
+                            <div class="d-flex justify-content-between"><span>Loan Amount</span><span>@Model.Assumptions.LoanAmount.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Interest Rate</span><span>@Model.Assumptions.MortgageInterestRate.ToString("0.00")%</span></div>
+                            <div class="d-flex justify-content-between"><span>Term</span><span>@Model.Assumptions.TermYears years</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small text-uppercase">Income & Debt</div>
+                            <div class="d-flex justify-content-between"><span>Monthly Rent</span><span>@Model.Assumptions.MonthlyRent.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Mortgage P&amp;I</span><span>@Model.Assumptions.MonthlyMortgage.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>PMI</span><span>@Model.Assumptions.MonthlyPmi.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Total Monthly Expenses</span><span>@Model.Assumptions.TotalMonthlyExpenses.ToString("C0")</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small text-uppercase">Operating Expenses</div>
+                            <div class="d-flex justify-content-between"><span>Property Taxes</span><span>@Model.Assumptions.MonthlyPropertyTaxes.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Insurance</span><span>@Model.Assumptions.MonthlyInsurance.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Vacancy</span><span>@Model.Assumptions.MonthlyVacancy.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Property Management</span><span>@Model.Assumptions.MonthlyPropertyManagement.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Maintenance</span><span>@Model.Assumptions.MonthlyMaintenance.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Utilities</span><span>@Model.Assumptions.MonthlyUtilities.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Other Expenses</span><span>@Model.Assumptions.MonthlyOtherExpenses.ToString("C0")</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="text-muted small text-uppercase">Cash Requirement</div>
+                            <div class="d-flex justify-content-between"><span>Estimated Cash Invested</span><span>@Model.Assumptions.TotalCashInvested.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Non-Mortgage Expenses</span><span>@Model.Assumptions.MonthlyNonMortgageExpenses.ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Annual NOI</span><span>@((Model.Assumptions.MonthlyRent - Model.Assumptions.MonthlyNonMortgageExpenses) * 12m).ToString("C0")</span></div>
+                            <div class="d-flex justify-content-between"><span>Annual Debt Service</span><span>@((Model.Assumptions.MonthlyMortgage + Model.Assumptions.MonthlyPmi) * 12m).ToString("C0")</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="fw-semibold">Listing Snapshot</div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between"><span>Price</span><span>@Model.Listing.Price.ToString("C0")</span></div>
+                <div class="d-flex justify-content-between"><span>Estimated Rent</span><span>@Model.Listing.EstimatedRent.ToString("C0")</span></div>
+                <div class="d-flex justify-content-between"><span>Bedrooms</span><span>@(Model.Listing.Bedrooms?.ToString() ?? "-")</span></div>
+                <div class="d-flex justify-content-between"><span>Bathrooms</span><span>@(Model.Listing.Bathrooms?.ToString("0.0") ?? "-")</span></div>
+            </div>
+        </div>
+    </div>
+</div>
