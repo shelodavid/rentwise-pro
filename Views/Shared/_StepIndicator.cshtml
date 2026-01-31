@@ -1,0 +1,17 @@
+@model IReadOnlyList<string>
+@{
+    var activeStep = ViewData["ActiveStep"] is int step ? step : 0;
+}
+
+<ol class="step-indicator" aria-label="Workflow steps">
+    @for (var index = 0; index < Model.Count; index++)
+    {
+        var isActive = index == activeStep;
+        var isComplete = index < activeStep;
+        var stateClass = isActive ? "is-active" : isComplete ? "is-complete" : string.Empty;
+        <li class="@stateClass" data-step-indicator>
+            <span class="step-badge" aria-hidden="true">@(index + 1)</span>
+            <span>@Model[index]</span>
+        </li>
+    }
+</ol>

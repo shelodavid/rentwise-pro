@@ -1,0 +1,14 @@
+@{
+    var label = ViewData["StatLabel"] as string ?? string.Empty;
+    var value = ViewData["StatValue"] as string ?? string.Empty;
+    var helper = ViewData["StatHelper"] as string;
+}
+
+<div class="stat-card">
+    <div class="label">@label</div>
+    <div class="value">@value</div>
+    @if (!string.IsNullOrWhiteSpace(helper))
+    {
+        <div class="text-muted small">@helper</div>
+    }
+</div>

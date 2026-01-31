@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,38 +9,68 @@
     <link rel="stylesheet" href="~/RentWisePro.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RentWisePro.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var currentZpid = ViewData["CurrentZpid"]?.ToString();
+        var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentZpid)
+            ? Url.Action("GeneratePurchaseSheet", "Home", new { zpid = currentZpid })
+            : Url.Action("Index", "Home");
+        var forecastUrl = !string.IsNullOrWhiteSpace(currentZpid)
+            ? Url.Action("Forecast", "Forecast", new { zpid = currentZpid })
+            : Url.Action("Index", "Home");
+
+        string NavClass(string controller, string action)
+        {
+            return string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)
+                ? "active"
+                : string.Empty;
+        }
+    }
+    <div class="app-shell">
+        <aside class="app-sidebar" aria-label="Primary">
+            <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">RentWise Pro</a>
+            <nav class="app-nav nav flex-column" role="navigation">
+                <a class="nav-link @NavClass("Home", "Index")" asp-controller="Home" asp-action="Index">
+                    Listings
+                </a>
+                <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
+                    Purchase Sheet
+                </a>
+                <a class="nav-link @NavClass("Forecast", "Forecast")" href="@forecastUrl">
+                    ROI Forecast
+                </a>
+                <a class="nav-link @NavClass("Home", "Privacy")" asp-controller="Home" asp-action="Privacy">
+                    Privacy
+                </a>
+            </nav>
+        </aside>
+
+        <div class="app-main">
+            <header class="app-topbar">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-outline-secondary d-lg-none" type="button" data-sidebar-toggle aria-label="Toggle navigation">
+                        Menu
+                    </button>
+                    <div class="topbar-title">Investment Dashboard</div>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge-soft">Portfolio Healthy</span>
+                    <button class="btn btn-primary btn-sm" type="button">New Analysis</button>
+                </div>
+            </header>
+
+            <main role="main" class="app-content">
+                @RenderBody()
+            </main>
+
+            <footer class="app-footer border-top">
+                &copy; 2026 - RentWisePro.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </footer>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - RentWisePro.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

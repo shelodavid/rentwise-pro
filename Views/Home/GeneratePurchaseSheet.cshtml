@@ -1,15 +1,16 @@
 @model RentWisePro.Web.Models.PurchaseSheetPageVm
 @{
     ViewData["Title"] = "Purchase Sheet";
+    ViewData["PageTitle"] = "Purchase Sheet";
+    ViewData["PageSubtitle"] = "Review financing assumptions and upfront costs before committing capital.";
+    ViewData["CurrentZpid"] = Model.Zpid;
 }
 
-<div class="mb-4">
-    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Back to Listings</a>
-</div>
+@await Html.PartialAsync("_PageHeader")
 
-<div class="row g-4 align-items-start mb-4">
-    <div class="col-lg-4">
-        <div class="card shadow-sm">
+<div class="row g-4" data-stepper data-active-step="0">
+    <div class="col-xl-4">
+        <div class="card h-100">
             @if (!string.IsNullOrWhiteSpace(Model.ImgSrc))
             {
                 <img src="@Model.ImgSrc" class="card-img-top" alt="Listing image" />
@@ -17,23 +18,43 @@
             <div class="card-body">
                 <h4 class="card-title mb-1">@Model.StreetAddress</h4>
                 <p class="text-muted">@Model.City, @Model.State @Model.ZipCode</p>
-                <div class="mb-2"><strong>Price:</strong> @(Model.Price.HasValue ? Model.Price.Value.ToString("C") : "-")</div>
-                <div class="mb-2"><strong>Type:</strong> @Model.PropertyType</div>
-                <div class="mb-2"><strong>Beds/Baths:</strong> @(Model.Bedrooms?.ToString() ?? "-") / @(Model.Bathrooms?.ToString("0.0") ?? "-")</div>
-                <div><strong>Estimated Rent:</strong> @(Model.EstimatedRent.HasValue ? Model.EstimatedRent.Value.ToString("C") : "-")</div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-muted small">Price</div>
+                        <div class="fw-semibold">@(Model.Price.HasValue ? Model.Price.Value.ToString("C0") : "-")</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Estimated Rent</div>
+                        <div class="fw-semibold">@(Model.EstimatedRent.HasValue ? Model.EstimatedRent.Value.ToString("C0") : "-")</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Type</div>
+                        <div class="fw-semibold">@Model.PropertyType</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Beds/Baths</div>
+                        <div class="fw-semibold">@(Model.Bedrooms?.ToString() ?? "-") / @(Model.Bathrooms?.ToString("0.0") ?? "-")</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a class="btn btn-outline-secondary w-100" asp-controller="Home" asp-action="Index">Back to Listings</a>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-8">
-        <div class="card shadow-sm">
+    <div class="col-xl-8">
+        <form asp-action="GeneratePurchaseSheet" method="post" class="card">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Zpid" />
             <div class="card-body">
-                <h3 class="card-title">Purchase Sheet</h3>
-                <p class="text-muted">Adjust assumptions to see updated cash-to-close and mortgage metrics.</p>
-                <form asp-action="GeneratePurchaseSheet" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Zpid" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                @await Html.PartialAsync("_StepIndicator", new[] { "Financing", "Upfront Costs", "Review" }, new ViewDataDictionary(ViewData) { ["ActiveStep"] = 0 })
 
+                <section class="step-panel is-active" data-step-panel="0" aria-hidden="false">
+                    <div class="mb-4">
+                        <h5 class="mb-1">Financing Assumptions</h5>
+                        <p class="text-muted">Tune the financing terms that impact cash-to-close.</p>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label asp-for="DownpaymentPercentage" class="form-label"></label>
@@ -50,6 +71,18 @@
                             <input asp-for="TermYears" class="form-control" type="number" />
                             <span asp-validation-for="TermYears" class="text-danger"></span>
                         </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="button" class="btn btn-primary" data-step-next>Continue to Costs</button>
+                    </div>
+                </section>
+
+                <section class="step-panel" data-step-panel="1" aria-hidden="true">
+                    <div class="mb-4">
+                        <h5 class="mb-1">Upfront Costs</h5>
+                        <p class="text-muted">Set one-time costs for closing and renovations.</p>
+                    </div>
+                    <div class="row g-3">
                         <div class="col-md-4">
                             <label asp-for="ClosingCostOverride" class="form-label"></label>
                             <input asp-for="ClosingCostOverride" class="form-control" type="number" step="0.01" />
@@ -66,96 +99,119 @@
                             <span asp-validation-for="OtherUpfrontCosts" class="text-danger"></span>
                         </div>
                     </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-step-prev>Back</button>
+                        <button type="button" class="btn btn-primary" data-step-next>Review Outputs</button>
+                    </div>
+                </section>
 
-                    <hr class="my-4" />
-
+                <section class="step-panel" data-step-panel="2" aria-hidden="true">
+                    <div class="mb-4">
+                        <h5 class="mb-1">Review &amp; Submit</h5>
+                        <p class="text-muted">Confirm total cash requirements and cost breakdown.</p>
+                    </div>
                     <div class="row g-4">
                         <div class="col-lg-6">
-                            <h5>Computed Outputs</h5>
-                            <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Downpayment Amount</span>
-                                    <strong>@Model.Outputs.DownpaymentAmount.ToString("C")</strong>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Mortgage Amount</span>
-                                    <strong>@Model.Outputs.MortgageAmount.ToString("C")</strong>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Monthly P&amp;I</span>
-                                    <strong>@Model.Outputs.MonthlyPrincipalAndInterest.ToString("C")</strong>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Closing Costs (Calculated)</span>
-                                    <strong>@Model.Outputs.CalculatedClosingCosts.ToString("C")</strong>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Total Closing Costs Used</span>
-                                    <strong>@Model.Outputs.TotalClosingCosts.ToString("C")</strong>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Total Cash to Close</span>
-                                    <strong>@Model.Outputs.CashToClose.ToString("C")</strong>
-                                </li>
-                            </ul>
+                            <div class="card card-muted h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-semibold">Computed Outputs</h6>
+                                    <table class="table-lite">
+                                        <tr>
+                                            <td>Downpayment Amount</td>
+                                            <td>@Model.Outputs.DownpaymentAmount.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Mortgage Amount</td>
+                                            <td>@Model.Outputs.MortgageAmount.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Monthly P&amp;I</td>
+                                            <td>@Model.Outputs.MonthlyPrincipalAndInterest.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Closing Costs (Calculated)</td>
+                                            <td>@Model.Outputs.CalculatedClosingCosts.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Closing Costs Used</td>
+                                            <td>@Model.Outputs.TotalClosingCosts.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Cash to Close</td>
+                                            <td>@Model.Outputs.CashToClose.ToString("C")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-lg-6">
-                            <h5>Closing Cost Breakdown</h5>
-                            <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Base Closing Costs</span>
-                                    <span>@Model.ClosingCosts.ClosingCostsPercentage.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Realtor Fees</span>
-                                    <span>@Model.ClosingCosts.RealtorFees.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Loan Origination</span>
-                                    <span>@Model.ClosingCosts.LoanOriginationFee.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Appraisal</span>
-                                    <span>@Model.ClosingCosts.AppraisalFee.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Credit Report</span>
-                                    <span>@Model.ClosingCosts.CreditReportFee.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Title Insurance</span>
-                                    <span>@Model.ClosingCosts.TitleInsurance.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Title Search</span>
-                                    <span>@Model.ClosingCosts.TitleSearch.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Escrow Fee</span>
-                                    <span>@Model.ClosingCosts.EscrowFee.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Flood Inspection</span>
-                                    <span>@Model.ClosingCosts.FloodInspectionFee.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Miscellaneous Fees</span>
-                                    <span>@Model.ClosingCosts.MiscellaneousFees.ToString("C")</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>HOA Estimate</span>
-                                    <span>@Model.ClosingCosts.HoaEstimate.ToString("C")</span>
-                                </li>
-                            </ul>
+                            <div class="card card-muted h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="fw-semibold mb-0">Closing Cost Breakdown</h6>
+                                        <button class="collapse-toggle" type="button" data-collapse-target="closingCostBreakdown" aria-expanded="false">
+                                            Toggle
+                                        </button>
+                                    </div>
+                                    <div id="closingCostBreakdown" class="collapse-panel mt-3" aria-live="polite">
+                                        <table class="table-lite">
+                                            <tr>
+                                                <td>Base Closing Costs</td>
+                                                <td>@Model.ClosingCosts.ClosingCostsPercentage.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Realtor Fees</td>
+                                                <td>@Model.ClosingCosts.RealtorFees.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Loan Origination</td>
+                                                <td>@Model.ClosingCosts.LoanOriginationFee.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Appraisal</td>
+                                                <td>@Model.ClosingCosts.AppraisalFee.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Credit Report</td>
+                                                <td>@Model.ClosingCosts.CreditReportFee.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Title Insurance</td>
+                                                <td>@Model.ClosingCosts.TitleInsurance.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Title Search</td>
+                                                <td>@Model.ClosingCosts.TitleSearch.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Escrow Fee</td>
+                                                <td>@Model.ClosingCosts.EscrowFee.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Flood Inspection</td>
+                                                <td>@Model.ClosingCosts.FloodInspectionFee.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Miscellaneous Fees</td>
+                                                <td>@Model.ClosingCosts.MiscellaneousFees.ToString("C")</td>
+                                            </tr>
+                                            <tr>
+                                                <td>HOA Estimate</td>
+                                                <td>@Model.ClosingCosts.HoaEstimate.ToString("C")</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="mt-4 d-flex justify-content-end">
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-step-prev>Back</button>
                         <button type="submit" class="btn btn-primary btn-lg">Update Purchase Sheet</button>
                     </div>
-                </form>
+                </section>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
