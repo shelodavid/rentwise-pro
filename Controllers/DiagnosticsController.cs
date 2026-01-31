@@ -22,6 +22,7 @@ namespace RentWisePro.Web.Controllers
             var profileCount = await _db.InvestmentProfiles.CountAsync();
             var listingCount = await _db.RentalListings.CountAsync();
             var savedCount = await _db.SavedPropertyProfiles.CountAsync();
+            var count = _db.RentalListings.Count();
 
             return Ok(new
             {
@@ -30,8 +31,9 @@ namespace RentWisePro.Web.Controllers
                 {
                     investmentProfiles = profileCount,
                     rentalListings = listingCount,
-                    savedPropertyProfiles = savedCount
-                }
+                    savedPropertyProfiles = savedCount,
+                    listingCount = count
+        }
             });
         }
     }
