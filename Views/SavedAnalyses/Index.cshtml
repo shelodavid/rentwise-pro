@@ -1,0 +1,61 @@
+@using System.Linq
+@model RentWisePro.Web.Models.SavedAnalyses.SavedAnalysesIndexVm
+
+@{
+    ViewData["Title"] = "Saved Analyses";
+    ViewData["PageSubtitle"] = "Revisit previously saved purchase sheet snapshots.";
+}
+
+@await Html.PartialAsync("_PageHeader")
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Analyses.Count == 0)
+        {
+            <div class="text-center">
+                <h5 class="mb-2">No saved analyses yet.</h5>
+                <p class="text-muted mb-0">Start a purchase sheet to capture your assumptions.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Address</th>
+                            <th>Location</th>
+                            <th>Price</th>
+                            <th>Saved</th>
+                            <th>Profile</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var analysis in Model.Analyses)
+                        {
+                            var locationLine = string.Join(", ", new[]
+                            {
+                                analysis.City,
+                                analysis.State,
+                                analysis.ZipCode
+                            }.Where(part => !string.IsNullOrWhiteSpace(part)));
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@analysis.StreetAddress</div>
+                                </td>
+                                <td>@locationLine</td>
+                                <td>@(analysis.Price.HasValue ? analysis.Price.Value.ToString("C0") : "—")</td>
+                                <td>@analysis.SavedAtUtc.ToLocalTime().ToString("g")</td>
+                                <td>@analysis.InvestmentProfileName</td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-primary btn-sm" asp-action="Details" asp-route-id="@analysis.SavedPropertyProfileId">Open</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

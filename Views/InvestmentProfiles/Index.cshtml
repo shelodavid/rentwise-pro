@@ -43,7 +43,7 @@
                             <tr>
                                 <td>
                                     <div class="fw-semibold">@profile.InvestmentProfileName</div>
-                                    @if (profile.IsDefault)
+                                    @if (profile.InvestmentProfileName == "Default")
                                     {
                                         <span class="badge bg-primary-subtle text-primary border">Default</span>
                                     }
@@ -55,7 +55,7 @@
                                 <td class="text-end">
                                     <div class="d-inline-flex gap-2">
                                         <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@profile.Id">Edit</a>
-                                        @if (!profile.IsDefault)
+                                        @if (profile.InvestmentProfileName != "Default")
                                         {
                                             <form asp-action="SetDefault" asp-route-id="@profile.Id" method="post">
                                                 @Html.AntiForgeryToken()

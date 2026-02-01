@@ -95,7 +95,5 @@ namespace RentWisePro.Web.Models
         [Display(Name = "HOA estimate ($)")]
         public decimal? HOAEstimate { get; set; } = 0m;
 
-        [Display(Name = "Set as default")]
-        public bool IsDefault { get; set; }
     }
 }
