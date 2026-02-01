@@ -7,7 +7,10 @@
     ViewData["PageMeta"] = Model.InvestmentProfileName;
 }
 
-@await Html.PartialAsync("_PageHeader")
+@await Html.PartialAsync("_PageHeader", (
+    ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? string.Empty,
+    ViewData["PageSubtitle"] as string,
+    ViewData["PageMeta"] as string))
 
 <div class="d-flex flex-wrap gap-2 mb-4">
     <a class="btn btn-outline-secondary" asp-controller="SavedAnalyses" asp-action="Details" asp-route-id="@Model.SavedPropertyProfileId">
