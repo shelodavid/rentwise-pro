@@ -1,7 +1,8 @@
+@model (string Title, string? Subtitle, string? Meta)
 @{
-    var title = ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? string.Empty;
-    var subtitle = ViewData["PageSubtitle"] as string;
-    var meta = ViewData["PageMeta"] as string;
+    var title = Model.Title;
+    var subtitle = Model.Subtitle;
+    var meta = Model.Meta;
     var actionLabel = ViewData["PageActionLabel"] as string;
     var actionUrl = ViewData["PageActionUrl"] as string;
 }

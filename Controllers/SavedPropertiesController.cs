@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 using RentWisePro.Web.Domain.Entities;
 using RentWisePro.Web.Models;
-using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
@@ -11,26 +10,17 @@ namespace RentWisePro.Web.Controllers
     public class SavedPropertiesController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;
-        private readonly InvestmentProfileResolver _investmentProfileResolver;
 
-        public SavedPropertiesController(
-            RentWiseProDbContext dbContext,
-            InvestmentProfileResolver investmentProfileResolver)
+        public SavedPropertiesController(RentWiseProDbContext dbContext)
         {
             _dbContext = dbContext;
-            _investmentProfileResolver = investmentProfileResolver;
         }
 
         [HttpPost("StartAnalysis")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartAnalysis(StartAnalysisRequest request)
         {
-            if (request == null || !ModelState.IsValid)
-            {
-                return BadRequest("A listing identifier is required.");
-            }
-
-            if (!request.Zpid.HasValue && !request.RentalListingId.HasValue)
+            if (request == null || (!request.Zpid.HasValue && !request.RentalListingId.HasValue))
             {
                 return BadRequest("A listing identifier is required.");
             }
@@ -45,14 +35,15 @@ namespace RentWisePro.Web.Controllers
                 return NotFound("Listing not found.");
             }
 
-            var investmentProfile = await _investmentProfileResolver.GetDefaultAsync();
+            var investmentProfile = await _dbContext.InvestmentProfiles
+                .FirstOrDefaultAsync(profile => profile.Id == 1);
 
             if (investmentProfile is null)
             {
                 return NotFound("Default investment profile not found.");
             }
 
-            var savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
+            var savedProfile = await _dbContext.SavedPropertyProfiles
                 .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId
                                                 && profile.InvestmentProfileId == investmentProfile.Id);
 
@@ -69,21 +60,7 @@ namespace RentWisePro.Web.Controllers
                 };
 
                 _dbContext.SavedPropertyProfiles.Add(savedProfile);
-                try
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                catch (DbUpdateException)
-                {
-                    savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
-                        .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId
-                                                        && profile.InvestmentProfileId == investmentProfile.Id);
-
-                    if (savedProfile is null)
-                    {
-                        throw;
-                    }
-                }
+                await _dbContext.SaveChangesAsync();
             }
 
             return RedirectToAction("GeneratePurchaseSheet", "Home",

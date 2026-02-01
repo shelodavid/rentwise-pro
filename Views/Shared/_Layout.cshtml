@@ -12,23 +12,13 @@
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-        var savedPropertyProfileId = 0;
-        if (ViewData["CurrentSavedPropertyProfileId"] is int profileId)
-        {
-            savedPropertyProfileId = profileId;
-        }
-        else if (int.TryParse(ViewData["CurrentSavedPropertyProfileId"]?.ToString(), out var parsedProfileId))
-        {
-            savedPropertyProfileId = parsedProfileId;
-        }
-
-        var hasSavedPropertyProfile = savedPropertyProfileId > 0;
-        var purchaseSheetUrl = hasSavedPropertyProfile
-            ? Url.Action("GeneratePurchaseSheet", "Home", new { savedPropertyProfileId })
-            : Url.Action("Index", "RentalListings");
-        var forecastUrl = hasSavedPropertyProfile
-            ? Url.Action("Forecast", "Forecast", new { savedPropertyProfileId })
-            : Url.Action("Index", "RentalListings");
+        var currentSavedPropertyProfileId = ViewData["CurrentSavedPropertyProfileId"]?.ToString();
+        var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId)
+            ? Url.Action("GeneratePurchaseSheet", "Home", new { savedPropertyProfileId = currentSavedPropertyProfileId })
+            : Url.Action("Index", "Home");
+        var forecastUrl = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId)
+            ? Url.Action("Forecast", "Forecast", new { savedPropertyProfileId = currentSavedPropertyProfileId })
+            : Url.Action("Index", "Home");
 
         string NavClass(string controller, string action)
         {
