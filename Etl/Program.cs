@@ -8,6 +8,7 @@ using RentWisePro.Etl.Core.Services;
 using RentWisePro.Etl.Options;
 using RentWisePro.Etl.Persistence.Contexts;
 using RentWisePro.Etl.Persistence.Repositories;
+using RentWisePro.Etl.Services;
 using RentWisePro.Etl.Sources.Clients;
 using RentWisePro.Etl.Sources.Sources;
 using RentWisePro.Etl.Storage;
