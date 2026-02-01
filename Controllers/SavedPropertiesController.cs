@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 using RentWisePro.Web.Domain.Entities;
 using RentWisePro.Web.Models;
+using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
@@ -10,10 +11,14 @@ namespace RentWisePro.Web.Controllers
     public class SavedPropertiesController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;
+        private readonly InvestmentProfileResolver _investmentProfileResolver;
 
-        public SavedPropertiesController(RentWiseProDbContext dbContext)
+        public SavedPropertiesController(
+            RentWiseProDbContext dbContext,
+            InvestmentProfileResolver investmentProfileResolver)
         {
             _dbContext = dbContext;
+            _investmentProfileResolver = investmentProfileResolver;
         }
 
         [HttpPost("StartAnalysis")]
@@ -40,10 +45,7 @@ namespace RentWisePro.Web.Controllers
                 return NotFound("Listing not found.");
             }
 
-            var investmentProfile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .OrderByDescending(profile => profile.IsDefault)
-                .ThenBy(profile => profile.Id)
-                .FirstOrDefaultAsync();
+            var investmentProfile = await _investmentProfileResolver.GetDefaultAsync();
 
             if (investmentProfile is null)
             {
