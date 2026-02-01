@@ -24,6 +24,7 @@
             <div class="card-body">
                 <h5 class="card-title mb-3">Search &amp; Filters</h5>
                 <form method="get" asp-controller="RentalListings" asp-action="Index" class="listing-filter-form">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
                     <div class="mb-3">
                         <label class="form-label" for="search">Search</label>
                         <input class="form-control" id="search" name="search" value="@Model.Search" placeholder="Address, ZIP, or type" />
@@ -143,6 +144,7 @@
                 <ul class="pagination justify-content-center">
                     <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
                         <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                           asp-route-pageSize="@Model.PageSize"
                            asp-route-search="@Model.Search"
                            asp-route-city="@Model.City"
                            asp-route-state="@Model.State"
@@ -158,6 +160,7 @@
                     {
                         <li class="page-item @(pageIndex == Model.Page ? "active" : string.Empty)">
                             <a class="page-link" asp-action="Index" asp-route-page="@pageIndex"
+                               asp-route-pageSize="@Model.PageSize"
                                asp-route-search="@Model.Search"
                                asp-route-city="@Model.City"
                                asp-route-state="@Model.State"
@@ -172,6 +175,7 @@
                     }
                     <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
                         <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                           asp-route-pageSize="@Model.PageSize"
                            asp-route-search="@Model.Search"
                            asp-route-city="@Model.City"
                            asp-route-state="@Model.State"

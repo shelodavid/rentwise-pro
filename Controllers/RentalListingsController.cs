@@ -8,7 +8,8 @@ namespace RentWisePro.Web.Controllers
 {
     public class RentalListingsController : Controller
     {
-        private const int DefaultPageSize = 12;
+        private const int DefaultPageSize = 24;
+        private const int MaxPageSize = 96;
         private readonly RentWiseProDbContext _dbContext;
 
         public RentalListingsController(RentWiseProDbContext dbContext)
@@ -26,9 +27,21 @@ namespace RentWisePro.Web.Controllers
             int? minBedrooms,
             decimal? minBathrooms,
             string? propertyType,
-            int page = 1)
+            int page = 1,
+            int? pageSize = null)
         {
             var listingsQuery = _dbContext.RentalListings.AsNoTracking();
+            var normalizedPageSize = NormalizePageSize(pageSize);
+            var normalizedMinPrice = NormalizeNonNegative(minPrice);
+            var normalizedMaxPrice = NormalizeNonNegative(maxPrice);
+            var normalizedMinBedrooms = NormalizeNonNegative(minBedrooms);
+            var normalizedMinBathrooms = NormalizeNonNegative(minBathrooms);
+
+            if (normalizedMinPrice.HasValue && normalizedMaxPrice.HasValue
+                && normalizedMinPrice.Value > normalizedMaxPrice.Value)
+            {
+                (normalizedMinPrice, normalizedMaxPrice) = (normalizedMaxPrice, normalizedMinPrice);
+            }
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -62,24 +75,24 @@ namespace RentWisePro.Web.Controllers
                     listing.PropertyType != null && listing.PropertyType == typeTerm);
             }
 
-            if (minPrice.HasValue)
+            if (normalizedMinPrice.HasValue)
             {
-                listingsQuery = listingsQuery.Where(listing => listing.Price >= minPrice);
+                listingsQuery = listingsQuery.Where(listing => listing.Price >= normalizedMinPrice);
             }
 
-            if (maxPrice.HasValue)
+            if (normalizedMaxPrice.HasValue)
             {
-                listingsQuery = listingsQuery.Where(listing => listing.Price <= maxPrice);
+                listingsQuery = listingsQuery.Where(listing => listing.Price <= normalizedMaxPrice);
             }
 
-            if (minBedrooms.HasValue)
+            if (normalizedMinBedrooms.HasValue)
             {
-                listingsQuery = listingsQuery.Where(listing => listing.Bedrooms >= minBedrooms);
+                listingsQuery = listingsQuery.Where(listing => listing.Bedrooms >= normalizedMinBedrooms);
             }
 
-            if (minBathrooms.HasValue)
+            if (normalizedMinBathrooms.HasValue)
             {
-                listingsQuery = listingsQuery.Where(listing => listing.Bathrooms >= minBathrooms);
+                listingsQuery = listingsQuery.Where(listing => listing.Bathrooms >= normalizedMinBathrooms);
             }
 
             listingsQuery = listingsQuery
@@ -88,12 +101,12 @@ namespace RentWisePro.Web.Controllers
                 .ThenBy(listing => listing.RentalListingId);
 
             var totalCount = await listingsQuery.CountAsync();
-            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)DefaultPageSize));
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)normalizedPageSize));
             var normalizedPage = Math.Clamp(page, 1, totalPages);
 
             var listings = await listingsQuery
-                .Skip((normalizedPage - 1) * DefaultPageSize)
-                .Take(DefaultPageSize)
+                .Skip((normalizedPage - 1) * normalizedPageSize)
+                .Take(normalizedPageSize)
                 .Select(listing => new RentalListingCardVm
                 {
                     RentalListingId = listing.RentalListingId,
@@ -126,18 +139,38 @@ namespace RentWisePro.Web.Controllers
                 Search = search,
                 City = city,
                 State = state,
-                MinPrice = minPrice,
-                MaxPrice = maxPrice,
-                MinBedrooms = minBedrooms,
-                MinBathrooms = minBathrooms,
+                MinPrice = normalizedMinPrice,
+                MaxPrice = normalizedMaxPrice,
+                MinBedrooms = normalizedMinBedrooms,
+                MinBathrooms = normalizedMinBathrooms,
                 PropertyType = propertyType,
                 Page = normalizedPage,
-                PageSize = DefaultPageSize,
+                PageSize = normalizedPageSize,
                 TotalPages = totalPages,
                 TotalCount = totalCount
             };
 
             return View(viewModel);
+        }
+
+        private static int NormalizePageSize(int? pageSize)
+        {
+            if (!pageSize.HasValue || pageSize <= 0)
+            {
+                return DefaultPageSize;
+            }
+
+            return Math.Min(pageSize.Value, MaxPageSize);
+        }
+
+        private static decimal? NormalizeNonNegative(decimal? value)
+        {
+            return value.HasValue && value.Value >= 0 ? value : null;
+        }
+
+        private static int? NormalizeNonNegative(int? value)
+        {
+            return value.HasValue && value.Value >= 0 ? value : null;
         }
     }
 }
