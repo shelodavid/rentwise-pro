@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
@@ -7,6 +8,7 @@ using RentWisePro.Web.Models;
 namespace RentWisePro.Web.Controllers
 {
     [Route("SavedProperties")]
+    [Authorize]
     public class SavedPropertiesController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;
