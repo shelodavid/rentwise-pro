@@ -12,12 +12,22 @@
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-        var currentZpid = ViewData["CurrentZpid"]?.ToString();
-        var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentZpid)
-            ? Url.Action("GeneratePurchaseSheet", "Home", new { zpid = currentZpid })
+        var savedPropertyProfileId = 0;
+        if (ViewData["CurrentSavedPropertyProfileId"] is int profileId)
+        {
+            savedPropertyProfileId = profileId;
+        }
+        else if (int.TryParse(ViewData["CurrentSavedPropertyProfileId"]?.ToString(), out var parsedProfileId))
+        {
+            savedPropertyProfileId = parsedProfileId;
+        }
+
+        var hasSavedPropertyProfile = savedPropertyProfileId > 0;
+        var purchaseSheetUrl = hasSavedPropertyProfile
+            ? Url.Action("GeneratePurchaseSheet", "Home", new { savedPropertyProfileId })
             : Url.Action("Index", "RentalListings");
-        var forecastUrl = !string.IsNullOrWhiteSpace(currentZpid)
-            ? Url.Action("Forecast", "Forecast", new { zpid = currentZpid })
+        var forecastUrl = hasSavedPropertyProfile
+            ? Url.Action("Forecast", "Forecast", new { savedPropertyProfileId })
             : Url.Action("Index", "RentalListings");
 
         string NavClass(string controller, string action)
@@ -35,7 +45,7 @@
                 <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
                     Listings
                 </a>
-                @if (!string.Equals(currentController, "RentalListings", StringComparison.OrdinalIgnoreCase))
+                @if (hasSavedPropertyProfile)
                 {
                     <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
                         Purchase Sheet

@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Home Page";
     ViewData["PageTitle"] = "Saved Properties";
-    ViewData["PageSubtitle"] = "Select a listing to build a purchase sheet or ROI forecast.";
+    ViewData["PageSubtitle"] = "Select a listing to start a new analysis.";
 }
 
 @await Html.PartialAsync("_PageHeader")
@@ -47,18 +47,11 @@ else
                             </div>
                         </div>
                         <div class="mt-auto d-flex flex-column gap-2">
-                            <a class="btn btn-primary"
-                               asp-controller="Home"
-                               asp-action="GeneratePurchaseSheet"
-                               asp-route-zpid="@listing.Zpid">
-                                Build Purchase Sheet
-                            </a>
-                            <a class="btn btn-outline-secondary"
-                               asp-controller="Forecast"
-                               asp-action="Forecast"
-                               asp-route-zpid="@listing.Zpid">
-                                View ROI Forecast
-                            </a>
+                            <form asp-controller="SavedProperties" asp-action="StartAnalysis" method="post" class="d-grid">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="zpid" value="@listing.Zpid" />
+                                <button type="submit" class="btn btn-primary">Start Analysis</button>
+                            </form>
                         </div>
                     </div>
                 </div>
