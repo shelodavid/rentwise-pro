@@ -35,6 +35,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<ForecastCalculationService>();
+builder.Services.AddScoped<ClosingDisclosureCalculationService>();
 builder.Services.AddScoped<InvestmentProfileResolver>();
 
 // Add services to the container.
