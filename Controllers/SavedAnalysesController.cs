@@ -8,7 +8,6 @@ using RentWisePro.Web.Models.SavedAnalyses;
 
 namespace RentWisePro.Web.Controllers
 {
-    [Authorize]
     [Route("SavedAnalyses")]
     [Authorize]
     public class SavedAnalysesController : Controller
