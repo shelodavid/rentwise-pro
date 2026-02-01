@@ -9,12 +9,20 @@ builder.Services.AddDbContext<RentWiseProDbContext>(options =>
     options.UseSqlServer(cs));
 
 builder.Services.AddScoped<ForecastCalculationService>();
+builder.Services.AddScoped<InvestmentProfileResolver>();
+builder.Services.AddScoped<InvestmentProfileSeeder>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<InvestmentProfileSeeder>();
+    await seeder.EnsureSeededAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -33,6 +41,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=RentalListings}/{action=Index}/{id?}");
 
 app.Run();

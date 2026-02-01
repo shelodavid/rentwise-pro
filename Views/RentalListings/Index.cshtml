@@ -1,0 +1,194 @@
+@model RentWisePro.Web.Models.RentalListingsIndexVm
+
+@{
+    ViewData["Title"] = "Listings";
+    var showingStart = Model.TotalCount == 0 ? 0 : ((Model.Page - 1) * Model.PageSize) + 1;
+    var showingEnd = Math.Min(Model.Page * Model.PageSize, Model.TotalCount);
+}
+
+<div class="page-header">
+    <div>
+        <h1>Rental Listings</h1>
+        <p class="subtitle">Search across ingested inventory and save the property you want to analyze next.</p>
+    </div>
+    <div class="listing-summary">
+        <div class="badge bg-light text-dark border">
+            Showing @showingStart-@showingEnd of @Model.TotalCount
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-3">
+        <div class="card listing-filter-card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Search &amp; Filters</h5>
+                <form method="get" asp-controller="RentalListings" asp-action="Index" class="listing-filter-form">
+                    <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                    <div class="mb-3">
+                        <label class="form-label" for="search">Search</label>
+                        <input class="form-control" id="search" name="search" value="@Model.Search" placeholder="Address, ZIP, or type" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="city">City</label>
+                        <input class="form-control" id="city" name="city" value="@Model.City" placeholder="Austin" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="state">State</label>
+                        <input class="form-control" id="state" name="state" value="@Model.State" placeholder="TX" maxlength="2" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price range</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input class="form-control" name="minPrice" value="@(Model.MinPrice?.ToString() ?? string.Empty)" placeholder="Min" type="number" min="0" step="1000" />
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" name="maxPrice" value="@(Model.MaxPrice?.ToString() ?? string.Empty)" placeholder="Max" type="number" min="0" step="1000" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Beds / Baths (min)</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input class="form-control" name="minBedrooms" value="@(Model.MinBedrooms?.ToString() ?? string.Empty)" placeholder="Beds" type="number" min="0" step="1" />
+                            </div>
+                            <div class="col-6">
+                                <input class="form-control" name="minBathrooms" value="@(Model.MinBathrooms?.ToString() ?? string.Empty)" placeholder="Baths" type="number" min="0" step="0.5" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="propertyType">Property type</label>
+                        <select class="form-select" id="propertyType" name="propertyType">
+                            <option value="">All types</option>
+                            @foreach (var type in Model.PropertyTypes)
+                            {
+                                <option value="@type.Value" selected="@(type.Value == Model.PropertyType ? "selected" : null)">
+                                    @type.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="submit">Apply filters</button>
+                        <a class="btn btn-outline-secondary" asp-controller="RentalListings" asp-action="Index">Clear filters</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-9">
+        @if (Model.Listings.Count == 0)
+        {
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-2">No listings match your filters.</h5>
+                    <p class="text-muted mb-0">Try adjusting the search criteria or clearing filters.</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="listing-grid">
+                @foreach (var listing in Model.Listings)
+                {
+                    <div class="card listing-card">
+                        <div class="listing-media">
+                            @if (!string.IsNullOrWhiteSpace(listing.ImgSrc))
+                            {
+                                <img src="@listing.ImgSrc" alt="Listing photo" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="listing-placeholder">
+                                    <span>No photo</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-body d-flex flex-column gap-3">
+                            <div class="d-flex align-items-start justify-content-between gap-3">
+                                <div>
+                                    <h5 class="listing-address">@listing.StreetAddress</h5>
+                                    <div class="text-muted small">
+                                        @listing.City, @listing.State @listing.ZipCode
+                                    </div>
+                                </div>
+                                <div class="listing-price">
+                                    @(listing.Price.HasValue ? listing.Price.Value.ToString("C0") : "—")
+                                </div>
+                            </div>
+                            <div class="listing-meta">
+                                <span>@(listing.Bedrooms?.ToString() ?? "—") bd</span>
+                                <span>@(listing.Bathrooms?.ToString("0.0") ?? "—") ba</span>
+                                <span>@(listing.PropertyType ?? "Property type")</span>
+                            </div>
+                            <div class="listing-actions">
+                                <form asp-controller="SavedProperties" asp-action="StartAnalysis" method="post" class="d-grid">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="zpid" value="@listing.Zpid" />
+                                    <input type="hidden" name="rentalListingId" value="@listing.RentalListingId" />
+                                    <button type="submit" class="btn btn-primary">Start Analysis</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="listing-pagination" aria-label="Listings pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-search="@Model.Search"
+                           asp-route-city="@Model.City"
+                           asp-route-state="@Model.State"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-minBedrooms="@Model.MinBedrooms"
+                           asp-route-minBathrooms="@Model.MinBathrooms"
+                           asp-route-propertyType="@Model.PropertyType">
+                            Previous
+                        </a>
+                    </li>
+                    @for (var pageIndex = 1; pageIndex <= Model.TotalPages; pageIndex++)
+                    {
+                        <li class="page-item @(pageIndex == Model.Page ? "active" : string.Empty)">
+                            <a class="page-link" asp-action="Index" asp-route-page="@pageIndex"
+                               asp-route-pageSize="@Model.PageSize"
+                               asp-route-search="@Model.Search"
+                               asp-route-city="@Model.City"
+                               asp-route-state="@Model.State"
+                               asp-route-minPrice="@Model.MinPrice"
+                               asp-route-maxPrice="@Model.MaxPrice"
+                               asp-route-minBedrooms="@Model.MinBedrooms"
+                               asp-route-minBathrooms="@Model.MinBathrooms"
+                               asp-route-propertyType="@Model.PropertyType">
+                                @pageIndex
+                            </a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-search="@Model.Search"
+                           asp-route-city="@Model.City"
+                           asp-route-state="@Model.State"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-minBedrooms="@Model.MinBedrooms"
+                           asp-route-minBathrooms="@Model.MinBathrooms"
+                           asp-route-propertyType="@Model.PropertyType">
+                            Next
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>

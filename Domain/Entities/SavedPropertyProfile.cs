@@ -17,10 +17,10 @@ namespace RentWisePro.Web.Domain.Entities
         public int RentalListingId { get; set; }
 
         // “Snapshot” of assumptions at save-time (so forecasts are stable)
-        [Column(TypeName = "decimal(18,2)")]
+        [Column(TypeName = "decimal(18,4)")]
         public decimal DownpaymentPercentage { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
+        [Column(TypeName = "decimal(18,4)")]
         public decimal MortgageInterestRate { get; set; }
 
         public int TermYears { get; set; }
