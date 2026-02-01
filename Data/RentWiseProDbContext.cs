@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Domain.Entities;
+using RentWisePro.Web.Domain.Identity;
 
 namespace RentWisePro.Web.Data
 {
-    public class RentWiseProDbContext : DbContext
+    public class RentWiseProDbContext : IdentityDbContext<ApplicationUser>
     {
         public RentWiseProDbContext(DbContextOptions<RentWiseProDbContext> options)
             : base(options)
@@ -29,6 +31,11 @@ namespace RentWisePro.Web.Data
 
                 entity.Property(e => e.IsDefault)
                       .HasDefaultValue(false);
+
+                entity.Property(e => e.UserId)
+                      .HasMaxLength(450);
+
+                entity.HasIndex(e => e.UserId);
 
                 // Seed the “ID=1 default profile” you mentioned
                 entity.HasData(new InvestmentProfile
@@ -95,6 +102,11 @@ namespace RentWisePro.Web.Data
 
                 entity.Property(e => e.SavedAtUtc)
                       .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                entity.Property(e => e.UserId)
+                      .HasMaxLength(450);
+
+                entity.HasIndex(e => e.UserId);
             });
         }
     }

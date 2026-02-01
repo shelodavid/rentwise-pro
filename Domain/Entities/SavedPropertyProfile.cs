@@ -16,6 +16,9 @@ namespace RentWisePro.Web.Domain.Entities
         [Required]
         public int RentalListingId { get; set; }
 
+        [MaxLength(450)]
+        public string? UserId { get; set; }
+
         // “Snapshot” of assumptions at save-time (so forecasts are stable)
         [Column(TypeName = "decimal(18,4)")]
         public decimal DownpaymentPercentage { get; set; }

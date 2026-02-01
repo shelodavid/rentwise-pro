@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
@@ -6,6 +8,7 @@ using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     public class ForecastController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;
@@ -26,8 +29,10 @@ namespace RentWisePro.Web.Controllers
                 return RedirectToListingsWithMessage();
             }
 
+            var userId = CurrentUserId;
             var savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == savedPropertyProfileId.Value);
+                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == savedPropertyProfileId.Value
+                                                && profile.UserId == userId);
 
             if (savedProfile is null)
             {
@@ -43,7 +48,8 @@ namespace RentWisePro.Web.Controllers
             }
 
             var investmentProfile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(profile => profile.Id == savedProfile.InvestmentProfileId);
+                .FirstOrDefaultAsync(profile => profile.Id == savedProfile.InvestmentProfileId
+                                                && profile.UserId == userId);
 
             if (investmentProfile is null)
             {
@@ -88,5 +94,7 @@ namespace RentWisePro.Web.Controllers
             TempData["StatusMessage"] = "Start an analysis first.";
             return RedirectToAction("Index", "Home");
         }
+
+        private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
 }

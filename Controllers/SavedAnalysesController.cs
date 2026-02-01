@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +8,7 @@ using RentWisePro.Web.Models.SavedAnalyses;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     [Route("SavedAnalyses")]
     public class SavedAnalysesController : Controller
     {
@@ -19,8 +22,10 @@ namespace RentWisePro.Web.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
+            var userId = CurrentUserId;
             var analyses = await _dbContext.SavedPropertyProfiles
                 .AsNoTracking()
+                .Where(profile => profile.UserId == userId)
                 .Include(profile => profile.RentalListing)
                 .Include(profile => profile.InvestmentProfile)
                 .OrderByDescending(profile => profile.SavedAtUtc)
@@ -48,11 +53,13 @@ namespace RentWisePro.Web.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Details(int id)
         {
+            var userId = CurrentUserId;
             var savedProfile = await _dbContext.SavedPropertyProfiles
                 .AsNoTracking()
                 .Include(profile => profile.RentalListing)
                 .Include(profile => profile.InvestmentProfile)
-                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == id);
+                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == id
+                                                && profile.UserId == userId);
 
             if (savedProfile is null)
             {
@@ -93,5 +100,7 @@ namespace RentWisePro.Web.Controllers
             ViewData["CurrentSavedPropertyProfileId"] = savedProfile.SavedPropertyProfileId;
             return View(viewModel);
         }
+
+        private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
 }

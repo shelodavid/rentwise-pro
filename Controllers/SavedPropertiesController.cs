@@ -1,19 +1,25 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 using RentWisePro.Web.Domain.Entities;
 using RentWisePro.Web.Models;
+using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     [Route("SavedProperties")]
     public class SavedPropertiesController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;
+        private readonly InvestmentProfileResolver _investmentProfileResolver;
 
-        public SavedPropertiesController(RentWiseProDbContext dbContext)
+        public SavedPropertiesController(RentWiseProDbContext dbContext, InvestmentProfileResolver investmentProfileResolver)
         {
             _dbContext = dbContext;
+            _investmentProfileResolver = investmentProfileResolver;
         }
 
         [HttpPost("StartAnalysis")]
@@ -35,8 +41,8 @@ namespace RentWisePro.Web.Controllers
                 return NotFound("Listing not found.");
             }
 
-            var investmentProfile = await _dbContext.InvestmentProfiles
-                .FirstOrDefaultAsync(profile => profile.Id == 1);
+            var userId = CurrentUserId;
+            var investmentProfile = await _investmentProfileResolver.GetDefaultAsync(userId);
 
             if (investmentProfile is null)
             {
@@ -45,7 +51,8 @@ namespace RentWisePro.Web.Controllers
 
             var savedProfile = await _dbContext.SavedPropertyProfiles
                 .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId
-                                                && profile.InvestmentProfileId == investmentProfile.Id);
+                                                && profile.InvestmentProfileId == investmentProfile.Id
+                                                && profile.UserId == userId);
 
             if (savedProfile is null)
             {
@@ -56,7 +63,8 @@ namespace RentWisePro.Web.Controllers
                     DownpaymentPercentage = investmentProfile.DownpaymentPercentage,
                     MortgageInterestRate = investmentProfile.MortgageInterestRate,
                     TermYears = investmentProfile.TermYears,
-                    SavedAtUtc = DateTime.UtcNow
+                    SavedAtUtc = DateTime.UtcNow,
+                    UserId = userId
                 };
 
                 _dbContext.SavedPropertyProfiles.Add(savedProfile);
@@ -66,5 +74,7 @@ namespace RentWisePro.Web.Controllers
             return RedirectToAction("GeneratePurchaseSheet", "Home",
                 new { savedPropertyProfileId = savedProfile.SavedPropertyProfileId });
         }
+
+        private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
 }
