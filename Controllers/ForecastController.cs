@@ -18,16 +18,24 @@ namespace RentWisePro.Web.Controllers
         }
 
         [HttpGet("/Home/Forecast")]
-        [HttpGet("/Forecast/{zpid:long?}")]
-        public async Task<IActionResult> Forecast(long? zpid)
+        [HttpGet("/Forecast/{savedPropertyProfileId:int?}")]
+        public async Task<IActionResult> Forecast(int? savedPropertyProfileId)
         {
-            if (!zpid.HasValue)
+            if (!savedPropertyProfileId.HasValue || savedPropertyProfileId.Value <= 0)
             {
-                return BadRequest("A zpid query parameter is required.");
+                return RedirectToListingsWithMessage();
+            }
+
+            var savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
+                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == savedPropertyProfileId.Value);
+
+            if (savedProfile is null)
+            {
+                return RedirectToListingsWithMessage();
             }
 
             var listing = await _dbContext.RentalListings.AsNoTracking()
-                .FirstOrDefaultAsync(listing => listing.Zpid == zpid.Value);
+                .FirstOrDefaultAsync(listing => listing.RentalListingId == savedProfile.RentalListingId);
 
             if (listing is null)
             {
@@ -35,16 +43,12 @@ namespace RentWisePro.Web.Controllers
             }
 
             var investmentProfile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(profile => profile.Id == 1);
+                .FirstOrDefaultAsync(profile => profile.Id == savedProfile.InvestmentProfileId);
 
             if (investmentProfile is null)
             {
                 return NotFound("Default investment profile not found.");
             }
-
-            var savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId
-                                                && profile.InvestmentProfileId == investmentProfile.Id);
 
             var calculation = _forecastCalculationService.Calculate(listing, investmentProfile, savedProfile);
 
@@ -58,6 +62,7 @@ namespace RentWisePro.Web.Controllers
 
             var viewModel = new ForecastPageVm
             {
+                SavedPropertyProfileId = savedProfile.SavedPropertyProfileId,
                 Listing = new ListingSummary
                 {
                     Zpid = listing.Zpid,
@@ -74,7 +79,14 @@ namespace RentWisePro.Web.Controllers
                 Kpis = calculation.Kpis
             };
 
+            ViewData["CurrentSavedPropertyProfileId"] = savedProfile.SavedPropertyProfileId;
             return View("~/Views/Home/Forecast.cshtml", viewModel);
+        }
+
+        private IActionResult RedirectToListingsWithMessage()
+        {
+            TempData["StatusMessage"] = "Start an analysis first.";
+            return RedirectToAction("Index", "Home");
         }
     }
 }
