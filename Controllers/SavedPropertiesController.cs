@@ -41,7 +41,7 @@ namespace RentWisePro.Web.Controllers
             }
 
             var investmentProfile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .OrderByDescending(profile => profile.IsDefault)
+                .OrderByDescending(profile => profile.InvestmentProfileName == "Default")
                 .ThenBy(profile => profile.Id)
                 .FirstOrDefaultAsync();
 

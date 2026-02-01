@@ -20,7 +20,7 @@ namespace RentWisePro.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var profiles = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .OrderByDescending(profile => profile.IsDefault)
+                .OrderByDescending(profile => profile.InvestmentProfileName == "Default")
                 .ThenBy(profile => profile.InvestmentProfileName)
                 .ToListAsync();
 
@@ -30,12 +30,7 @@ namespace RentWisePro.Web.Controllers
         [HttpGet("Create")]
         public IActionResult Create()
         {
-            var viewModel = new InvestmentProfileVm
-            {
-                IsDefault = false
-            };
-
-            return View(viewModel);
+            return View(new InvestmentProfileVm());
         }
 
         [HttpPost("Create")]
@@ -49,15 +44,6 @@ namespace RentWisePro.Web.Controllers
 
             var profile = new InvestmentProfile();
             MapToEntity(viewModel, profile);
-
-            var hasDefault = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .AnyAsync(item => item.IsDefault);
-
-            if (viewModel.IsDefault || !hasDefault)
-            {
-                await ClearDefaultProfiles();
-                profile.IsDefault = true;
-            }
 
             _dbContext.InvestmentProfiles.Add(profile);
             await _dbContext.SaveChangesAsync();
@@ -104,12 +90,6 @@ namespace RentWisePro.Web.Controllers
 
             MapToEntity(viewModel, profile);
 
-            if (viewModel.IsDefault)
-            {
-                await ClearDefaultProfiles(profile.Id);
-                profile.IsDefault = true;
-            }
-
             await _dbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -126,16 +106,17 @@ namespace RentWisePro.Web.Controllers
                 return NotFound();
             }
 
-            await ClearDefaultProfiles(profile.Id);
-            profile.IsDefault = true;
+            await ClearDefaultName(profile.Id);
+            profile.InvestmentProfileName = "Default";
 
             await _dbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task ClearDefaultProfiles(int? ignoreId = null)
+        private async Task ClearDefaultName(int? ignoreId = null)
         {
-            var defaultsQuery = _dbContext.InvestmentProfiles.Where(item => item.IsDefault);
+            var defaultsQuery = _dbContext.InvestmentProfiles
+                .Where(item => item.InvestmentProfileName == "Default");
             if (ignoreId.HasValue)
             {
                 defaultsQuery = defaultsQuery.Where(item => item.Id != ignoreId.Value);
@@ -144,7 +125,7 @@ namespace RentWisePro.Web.Controllers
             var defaults = await defaultsQuery.ToListAsync();
             foreach (var existing in defaults)
             {
-                existing.IsDefault = false;
+                existing.InvestmentProfileName = $"Default (previous {existing.Id})";
             }
         }
 
@@ -174,8 +155,7 @@ namespace RentWisePro.Web.Controllers
                 EscrowFee = profile.EscrowFee ?? 0m,
                 FloodInspectionFee = profile.FloodInspectionFee ?? 0m,
                 MiscellaneousFees = profile.MiscellaneousFees ?? 0m,
-                HOAEstimate = profile.HOAEstimate ?? 0m,
-                IsDefault = profile.IsDefault
+                HOAEstimate = profile.HOAEstimate ?? 0m
             };
         }
 
@@ -203,7 +183,6 @@ namespace RentWisePro.Web.Controllers
             profile.FloodInspectionFee = viewModel.FloodInspectionFee ?? 0m;
             profile.MiscellaneousFees = viewModel.MiscellaneousFees ?? 0m;
             profile.HOAEstimate = viewModel.HOAEstimate ?? 0m;
-            profile.IsDefault = viewModel.IsDefault;
         }
     }
 }
