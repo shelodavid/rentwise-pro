@@ -497,6 +497,36 @@ img {
   padding: 4rem 0 3rem;
 }
 
+.hero-property-media {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero-property-image {
+  width: 100%;
+  border-radius: 1.25rem;
+  box-shadow: var(--rw-shadow);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+@media (min-width: 992px) {
+  .hero-property-media {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .hero-property-image {
+    flex: 1 1 52%;
+    max-height: 420px;
+  }
+
+  .hero-property-media .marketing-hero-card {
+    flex: 1 1 48%;
+  }
+}
+
 .marketing-hero-card {
   background: var(--rw-surface);
   border-radius: var(--rw-radius);
