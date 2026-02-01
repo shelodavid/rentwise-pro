@@ -33,15 +33,21 @@ namespace RentWisePro.Web.Data
                       .HasDefaultValue(false);
 
                 entity.Property(e => e.UserId)
-                      .HasMaxLength(450);
+                      .HasMaxLength(450)
+                      .IsRequired();
 
                 entity.HasIndex(e => e.UserId);
+
+                entity.HasIndex(e => new { e.UserId, e.IsDefault })
+                      .IsUnique()
+                      .HasFilter("[IsDefault] = 1");
 
                 // Seed the “ID=1 default profile” you mentioned
                 entity.HasData(new InvestmentProfile
                 {
                     Id = 1,
                     InvestmentProfileName = "Default",
+                    UserId = "SYSTEM",
                     IsDefault = true,
                     DownpaymentPercentage = 20m,
                     TermYears = 30,
@@ -104,9 +110,12 @@ namespace RentWisePro.Web.Data
                       .HasDefaultValueSql("SYSUTCDATETIME()");
 
                 entity.Property(e => e.UserId)
-                      .HasMaxLength(450);
+                      .HasMaxLength(450)
+                      .IsRequired();
 
                 entity.HasIndex(e => e.UserId);
+
+                entity.HasIndex(e => new { e.UserId, e.SavedAtUtc });
             });
         }
     }

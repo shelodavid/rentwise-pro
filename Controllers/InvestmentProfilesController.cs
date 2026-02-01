@@ -5,25 +5,31 @@ using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 using RentWisePro.Web.Domain.Entities;
 using RentWisePro.Web.Models;
+using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
-    [Authorize]
     [Route("InvestmentProfiles")]
     [Authorize]
     public class InvestmentProfilesController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;
+        private readonly InvestmentProfileResolver _investmentProfileResolver;
 
-        public InvestmentProfilesController(RentWiseProDbContext dbContext)
+        public InvestmentProfilesController(
+            RentWiseProDbContext dbContext,
+            InvestmentProfileResolver investmentProfileResolver)
         {
             _dbContext = dbContext;
+            _investmentProfileResolver = investmentProfileResolver;
         }
 
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
             var userId = CurrentUserId;
+            await _investmentProfileResolver.EnsureDefaultAsync(userId);
+
             var profiles = await _dbContext.InvestmentProfiles.AsNoTracking()
                 .Where(profile => profile.UserId == userId)
                 .OrderByDescending(profile => profile.IsDefault)
