@@ -10,12 +10,14 @@ namespace RentWisePro.Web.Models.Account
 
         [Required]
         [DataType(DataType.Password)]
-        [MinLength(10)]
+        [StringLength(100, MinimumLength = 8)]
         public string Password { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        public string? ReturnUrl { get; set; }
     }
 }

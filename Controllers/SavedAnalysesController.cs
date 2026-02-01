@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +9,7 @@ namespace RentWisePro.Web.Controllers
 {
     [Authorize]
     [Route("SavedAnalyses")]
+    [Authorize]
     public class SavedAnalysesController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;

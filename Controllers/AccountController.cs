@@ -1,130 +1,36 @@
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using RentWisePro.Web.Data;
-using RentWisePro.Web.Domain.Identity;
 using RentWisePro.Web.Models.Account;
-using RentWisePro.Web.Services;
+using RentWisePro.Web.Models.Identity;
 
 namespace RentWisePro.Web.Controllers
 {
     [AllowAnonymous]
-    [Route("Account")]
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RentWiseProDbContext _dbContext;
-        private readonly IWebHostEnvironment _environment;
-        private readonly ILogger<AccountController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RentWiseProDbContext dbContext,
-            IWebHostEnvironment environment,
-            ILogger<AccountController> logger)
+            UserManager<ApplicationUser> userManager)
         {
-            _userManager = userManager;
             _signInManager = signInManager;
-            _dbContext = dbContext;
-            _environment = environment;
-            _logger = logger;
+            _userManager = userManager;
         }
 
-        [HttpGet("Register")]
-        public IActionResult Register(string? returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View(new RegisterViewModel());
-        }
-
-        [HttpPost("Register")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var user = new ApplicationUser
-            {
-                UserName = model.Email,
-                Email = model.Email
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-
-                return View(model);
-            }
-
-            await EnsureDefaultProfileAsync(user.Id);
-
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var confirmationLink = Url.Action(
-                "ConfirmEmail",
-                "Account",
-                new { userId = user.Id, token = encodedToken },
-                protocol: Request.Scheme);
-
-            if (!string.IsNullOrWhiteSpace(confirmationLink))
-            {
-                _logger.LogInformation("Email confirmation link for {Email}: {Link}", model.Email, confirmationLink);
-            }
-
-            var viewModel = new EmailConfirmationPendingViewModel
-            {
-                Email = model.Email,
-                ConfirmationLink = _environment.IsDevelopment() ? confirmationLink : null
-            };
-
-            return View("EmailConfirmationPending", viewModel);
-        }
-
-        [HttpGet("ConfirmEmail")]
-        public async Task<IActionResult> ConfirmEmail(string? userId, string? token)
-        {
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
-            {
-                return View(new ConfirmEmailViewModel { Succeeded = false });
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user is null)
-            {
-                return View(new ConfirmEmailViewModel { Succeeded = false });
-            }
-
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
-            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
-
-            return View(new ConfirmEmailViewModel { Succeeded = result.Succeeded });
-        }
-
-        [HttpGet("Login")]
+        [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View(new LoginViewModel());
+            var model = new LoginViewModel { ReturnUrl = returnUrl };
+            return View(model);
         }
 
-        [HttpPost("Login")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -138,32 +44,58 @@ namespace RentWisePro.Web.Controllers
 
             if (result.Succeeded)
             {
-                if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-
-                return RedirectToAction("Index", "Home");
+                return RedirectToLocal(model.ReturnUrl);
             }
 
             if (result.IsLockedOut)
             {
-                ModelState.AddModelError(string.Empty, "This account is locked due to multiple failed login attempts.");
+                ModelState.AddModelError(string.Empty, "This account is locked. Please try again later.");
+                return View(model);
             }
-            else if (result.IsNotAllowed)
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult Register(string? returnUrl = null)
+        {
+            var model = new RegisterViewModel { ReturnUrl = returnUrl };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Please confirm your email before logging in.");
+                return View(model);
             }
-            else
+
+            var user = new ApplicationUser
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                UserName = model.Email,
+                Email = model.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToLocal(model.ReturnUrl);
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
             }
 
             return View(model);
         }
 
         [Authorize]
-        [HttpPost("Logout")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
@@ -171,21 +103,20 @@ namespace RentWisePro.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        private async Task EnsureDefaultProfileAsync(string userId)
+        [HttpGet]
+        public IActionResult AccessDenied()
         {
-            var hasProfile = await _dbContext.InvestmentProfiles
-                .AnyAsync(profile => profile.UserId == userId);
-            if (hasProfile)
+            return View();
+        }
+
+        private IActionResult RedirectToLocal(string? returnUrl)
+        {
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
-                return;
+                return Redirect(returnUrl);
             }
 
-            var defaultProfile = InvestmentProfileDefaults.CreateDefault();
-            defaultProfile.UserId = userId;
-            defaultProfile.IsDefault = true;
-
-            _dbContext.InvestmentProfiles.Add(defaultProfile);
-            await _dbContext.SaveChangesAsync();
+            return RedirectToAction("Index", "RentalListings");
         }
     }
 }

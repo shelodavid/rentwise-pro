@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +9,7 @@ using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -26,33 +26,18 @@ namespace RentWisePro.Web.Controllers
             _calculationService = calculationService;
         }
 
-        public async Task<IActionResult> Index()
+        [AllowAnonymous]
+        public IActionResult Index()
         {
-            var listings = await _dbContext.RentalListings
-                .AsNoTracking()
-                .OrderByDescending(listing => listing.IngestedAtUtc)
-                .Take(24)
-                .ToListAsync();
-
-            var viewModel = new HomeIndexVm
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                Listings = listings.Select(listing => new PurchaseSheetListingVm
-                {
-                    Zpid = listing.Zpid,
-                    StreetAddress = listing.StreetAddress,
-                    City = listing.City,
-                    State = listing.State,
-                    ZipCode = listing.ZipCode,
-                    Price = listing.Price,
-                    Bedrooms = listing.Bedrooms,
-                    Bathrooms = listing.Bathrooms,
-                    ImgSrc = listing.ImgSrc
-                }).ToList()
-            };
+                return RedirectToAction("Index", "RentalListings");
+            }
 
-            return View(viewModel);
+            return View();
         }
 
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             return View();
