@@ -8,6 +8,7 @@ using RentWisePro.Web.Models;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     [Route("InvestmentProfiles")]
     [Authorize]
     public class InvestmentProfilesController : Controller
@@ -22,8 +23,10 @@ namespace RentWisePro.Web.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
+            var userId = CurrentUserId;
             var profiles = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .OrderByDescending(profile => profile.InvestmentProfileName == "Default")
+                .Where(profile => profile.UserId == userId)
+                .OrderByDescending(profile => profile.IsDefault)
                 .ThenBy(profile => profile.InvestmentProfileName)
                 .ToListAsync();
 
@@ -47,6 +50,7 @@ namespace RentWisePro.Web.Controllers
 
             var profile = new InvestmentProfile();
             MapToEntity(viewModel, profile);
+            profile.UserId = CurrentUserId;
 
             _dbContext.InvestmentProfiles.Add(profile);
             await _dbContext.SaveChangesAsync();
@@ -57,8 +61,9 @@ namespace RentWisePro.Web.Controllers
         [HttpGet("Edit/{id:int}")]
         public async Task<IActionResult> Edit(int id)
         {
+            var userId = CurrentUserId;
             var profile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(item => item.Id == id);
+                .FirstOrDefaultAsync(item => item.Id == id && item.UserId == userId);
 
             if (profile is null)
             {
@@ -83,8 +88,9 @@ namespace RentWisePro.Web.Controllers
                 return View(viewModel);
             }
 
+            var userId = CurrentUserId;
             var profile = await _dbContext.InvestmentProfiles
-                .FirstOrDefaultAsync(item => item.Id == id);
+                .FirstOrDefaultAsync(item => item.Id == id && item.UserId == userId);
 
             if (profile is null)
             {
@@ -101,25 +107,26 @@ namespace RentWisePro.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetDefault(int id)
         {
+            var userId = CurrentUserId;
             var profile = await _dbContext.InvestmentProfiles
-                .FirstOrDefaultAsync(item => item.Id == id);
+                .FirstOrDefaultAsync(item => item.Id == id && item.UserId == userId);
 
             if (profile is null)
             {
                 return NotFound();
             }
 
-            await ClearDefaultName(profile.Id);
-            profile.InvestmentProfileName = "Default";
+            await ClearDefaultFlag(profile.Id, userId);
+            profile.IsDefault = true;
 
             await _dbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task ClearDefaultName(int? ignoreId = null)
+        private async Task ClearDefaultFlag(int? ignoreId, string userId)
         {
             var defaultsQuery = _dbContext.InvestmentProfiles
-                .Where(item => item.InvestmentProfileName == "Default");
+                .Where(item => item.UserId == userId && item.IsDefault);
             if (ignoreId.HasValue)
             {
                 defaultsQuery = defaultsQuery.Where(item => item.Id != ignoreId.Value);
@@ -128,9 +135,11 @@ namespace RentWisePro.Web.Controllers
             var defaults = await defaultsQuery.ToListAsync();
             foreach (var existing in defaults)
             {
-                existing.InvestmentProfileName = $"Default (previous {existing.Id})";
+                existing.IsDefault = false;
             }
         }
+
+        private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
         private static InvestmentProfileVm MapToViewModel(InvestmentProfile profile)
         {

@@ -13,9 +13,10 @@ namespace RentWisePro.Web.Services
             _dbContext = dbContext;
         }
 
-        public async Task<InvestmentProfile?> GetDefaultAsync(CancellationToken cancellationToken = default)
+        public async Task<InvestmentProfile?> GetDefaultAsync(string userId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.InvestmentProfiles.AsNoTracking()
+                .Where(profile => profile.UserId == userId)
                 .OrderByDescending(profile => profile.IsDefault)
                 .ThenBy(profile => profile.Id)
                 .FirstOrDefaultAsync(cancellationToken);
