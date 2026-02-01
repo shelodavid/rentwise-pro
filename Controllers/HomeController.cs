@@ -57,50 +57,26 @@ namespace RentWisePro.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GeneratePurchaseSheet(long zpid)
+        public async Task<IActionResult> GeneratePurchaseSheet(int? savedPropertyProfileId)
         {
-            if (zpid <= 0)
+            if (!savedPropertyProfileId.HasValue || savedPropertyProfileId.Value <= 0)
             {
-                return BadRequest();
+                return RedirectToListingsWithMessage();
             }
 
-            var listing = await _dbContext.RentalListings
-                .FirstOrDefaultAsync(item => item.Zpid == zpid);
-
-            if (listing == null)
+            var dataBundle = await LoadPurchaseSheetData(savedPropertyProfileId.Value, trackSavedProfile: false);
+            if (dataBundle.SavedProfile is null)
             {
-                return NotFound();
+                return RedirectToListingsWithMessage();
             }
 
-            var profile = await _dbContext.InvestmentProfiles
-                .FirstOrDefaultAsync(item => item.Id == 1);
-
-            if (profile == null)
+            if (dataBundle.Listing is null || dataBundle.Profile is null)
             {
                 return NotFound();
             }
 
-            var savedProfile = await _dbContext.SavedPropertyProfiles
-                .FirstOrDefaultAsync(item =>
-                    item.InvestmentProfileId == profile.Id &&
-                    item.RentalListingId == listing.RentalListingId);
-
-            if (savedProfile == null)
-            {
-                savedProfile = new SavedPropertyProfile
-                {
-                    InvestmentProfileId = profile.Id,
-                    RentalListingId = listing.RentalListingId,
-                    DownpaymentPercentage = profile.DownpaymentPercentage,
-                    MortgageInterestRate = profile.MortgageInterestRate,
-                    TermYears = profile.TermYears
-                };
-
-                _dbContext.SavedPropertyProfiles.Add(savedProfile);
-                await _dbContext.SaveChangesAsync();
-            }
-
-            var viewModel = BuildPurchaseSheetViewModel(listing, profile, savedProfile);
+            var viewModel = BuildPurchaseSheetViewModel(dataBundle.Listing, dataBundle.Profile, dataBundle.SavedProfile);
+            ViewData["CurrentSavedPropertyProfileId"] = dataBundle.SavedProfile.SavedPropertyProfileId;
             return View(viewModel);
         }
 
@@ -108,56 +84,39 @@ namespace RentWisePro.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GeneratePurchaseSheet(PurchaseSheetPageVm model)
         {
-            var listing = await _dbContext.RentalListings
-                .FirstOrDefaultAsync(item => item.Zpid == model.Zpid);
+            if (model.SavedPropertyProfileId <= 0)
+            {
+                return RedirectToListingsWithMessage();
+            }
 
-            if (listing == null)
+            var dataBundle = await LoadPurchaseSheetData(model.SavedPropertyProfileId, trackSavedProfile: true);
+            if (dataBundle.SavedProfile is null)
+            {
+                return RedirectToListingsWithMessage();
+            }
+
+            if (dataBundle.Listing is null || dataBundle.Profile is null)
             {
                 return NotFound();
             }
-
-            var profile = await _dbContext.InvestmentProfiles
-                .FirstOrDefaultAsync(item => item.Id == 1);
-
-            if (profile == null)
-            {
-                return NotFound();
-            }
-
-            var savedProfile = await _dbContext.SavedPropertyProfiles
-                .FirstOrDefaultAsync(item =>
-                    item.InvestmentProfileId == profile.Id &&
-                    item.RentalListingId == listing.RentalListingId);
 
             if (!ModelState.IsValid)
             {
-                var fallbackProfile = savedProfile ?? new SavedPropertyProfile
-                {
-                    InvestmentProfileId = profile.Id,
-                    RentalListingId = listing.RentalListingId
-                };
+                var fallbackProfile = CloneSavedProfile(dataBundle.SavedProfile);
 
                 ApplyOverrides(model, fallbackProfile);
-                var invalidViewModel = BuildPurchaseSheetViewModel(listing, profile, fallbackProfile);
+                var invalidViewModel = BuildPurchaseSheetViewModel(dataBundle.Listing, dataBundle.Profile, fallbackProfile);
+                ViewData["CurrentSavedPropertyProfileId"] = dataBundle.SavedProfile.SavedPropertyProfileId;
                 return View(invalidViewModel);
             }
 
-            if (savedProfile == null)
-            {
-                savedProfile = new SavedPropertyProfile
-                {
-                    InvestmentProfileId = profile.Id,
-                    RentalListingId = listing.RentalListingId
-                };
-                _dbContext.SavedPropertyProfiles.Add(savedProfile);
-            }
-
-            ApplyOverrides(model, savedProfile);
-            savedProfile.SavedAtUtc = DateTime.UtcNow;
+            ApplyOverrides(model, dataBundle.SavedProfile);
+            dataBundle.SavedProfile.SavedAtUtc = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
 
-            var viewModel = BuildPurchaseSheetViewModel(listing, profile, savedProfile);
+            var viewModel = BuildPurchaseSheetViewModel(dataBundle.Listing, dataBundle.Profile, dataBundle.SavedProfile);
+            ViewData["CurrentSavedPropertyProfileId"] = dataBundle.SavedProfile.SavedPropertyProfileId;
             return View(viewModel);
         }
 
@@ -186,6 +145,7 @@ namespace RentWisePro.Web.Controllers
 
             return new PurchaseSheetPageVm
             {
+                SavedPropertyProfileId = savedProfile.SavedPropertyProfileId,
                 Zpid = listing.Zpid,
                 RentalListingId = listing.RentalListingId,
                 StreetAddress = listing.StreetAddress,
@@ -228,6 +188,57 @@ namespace RentWisePro.Web.Controllers
                     HoaEstimate = result.ClosingCosts.HoaEstimate
                 }
             };
+        }
+
+        private IActionResult RedirectToListingsWithMessage()
+        {
+            TempData["StatusMessage"] = "Start an analysis first.";
+            return RedirectToAction("Index");
+        }
+
+        private SavedPropertyProfile CloneSavedProfile(SavedPropertyProfile savedProfile)
+        {
+            return new SavedPropertyProfile
+            {
+                SavedPropertyProfileId = savedProfile.SavedPropertyProfileId,
+                InvestmentProfileId = savedProfile.InvestmentProfileId,
+                RentalListingId = savedProfile.RentalListingId,
+                DownpaymentPercentage = savedProfile.DownpaymentPercentage,
+                MortgageInterestRate = savedProfile.MortgageInterestRate,
+                TermYears = savedProfile.TermYears,
+                ClosingCostOverride = savedProfile.ClosingCostOverride,
+                RenovationBudget = savedProfile.RenovationBudget,
+                OtherUpfrontCosts = savedProfile.OtherUpfrontCosts,
+                MonthlyRentOverride = savedProfile.MonthlyRentOverride,
+                MonthlyOtherExpensesOverride = savedProfile.MonthlyOtherExpensesOverride,
+                SavedAtUtc = savedProfile.SavedAtUtc
+            };
+        }
+
+        private async Task<(SavedPropertyProfile? SavedProfile, RentalListing? Listing, InvestmentProfile? Profile)>
+            LoadPurchaseSheetData(int savedPropertyProfileId, bool trackSavedProfile)
+        {
+            IQueryable<SavedPropertyProfile> savedProfileQuery = _dbContext.SavedPropertyProfiles;
+            if (!trackSavedProfile)
+            {
+                savedProfileQuery = savedProfileQuery.AsNoTracking();
+            }
+
+            var savedProfile = await savedProfileQuery
+                .FirstOrDefaultAsync(item => item.SavedPropertyProfileId == savedPropertyProfileId);
+
+            if (savedProfile is null)
+            {
+                return (null, null, null);
+            }
+
+            var listing = await _dbContext.RentalListings.AsNoTracking()
+                .FirstOrDefaultAsync(item => item.RentalListingId == savedProfile.RentalListingId);
+
+            var profile = await _dbContext.InvestmentProfiles.AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Id == savedProfile.InvestmentProfileId);
+
+            return (savedProfile, listing, profile);
         }
     }
 }
