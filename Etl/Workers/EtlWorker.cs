@@ -1,25 +1,28 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RentWisePro.Etl.Core.Services;
+using RentWisePro.Etl.Core.Interfaces;
 using RentWisePro.Etl.Options;
 
 namespace RentWisePro.Etl.Workers;
 
 public class EtlWorker : BackgroundService
 {
-    private readonly EtlOrchestrator _orchestrator;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly EtlExecutionOptions _options;
     private readonly ILogger<EtlWorker> _logger;
+    private readonly IHostApplicationLifetime _applicationLifetime;
 
     public EtlWorker(
-        EtlOrchestrator orchestrator,
+        IServiceScopeFactory scopeFactory,
         IOptions<EtlExecutionOptions> options,
-        ILogger<EtlWorker> logger)
+        ILogger<EtlWorker> logger,
+        IHostApplicationLifetime applicationLifetime)
     {
-        _orchestrator = orchestrator;
+        _scopeFactory = scopeFactory;
         _options = options.Value;
         _logger = logger;
+        _applicationLifetime = applicationLifetime;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,13 +30,13 @@ public class EtlWorker : BackgroundService
         if (_options.QueueOnly)
         {
             _logger.LogInformation("Queue-only mode enabled. Skipping orchestrator runs.");
-            await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
             return;
         }
 
         if (_options.RunOnce)
         {
             await RunOnceAsync(stoppingToken);
+            _applicationLifetime.StopApplication();
             return;
         }
 
@@ -48,6 +51,8 @@ public class EtlWorker : BackgroundService
     private async Task RunOnceAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Starting ETL run (source={SourceFilter})", _options.SourceFilter ?? "all");
-        await _orchestrator.RunAsync(new EtlRunRequest(_options.SourceFilter, _options.Since, _options.PageSize), stoppingToken);
+        using var scope = _scopeFactory.CreateScope();
+        var orchestrator = scope.ServiceProvider.GetRequiredService<IEtlOrchestrator>();
+        await orchestrator.RunAsync(new EtlRunRequest(_options.SourceFilter, _options.Since, _options.PageSize), stoppingToken);
     }
 }
