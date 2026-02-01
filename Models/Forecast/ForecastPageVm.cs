@@ -2,6 +2,7 @@ namespace RentWisePro.Web.Models.Forecast
 {
     public class ForecastPageVm
     {
+        public int SavedPropertyProfileId { get; set; }
         public ListingSummary Listing { get; set; } = new();
         public ForecastAssumptions Assumptions { get; set; } = new();
         public ForecastKpis Kpis { get; set; } = new();

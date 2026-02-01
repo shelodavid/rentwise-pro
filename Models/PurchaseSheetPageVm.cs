@@ -4,6 +4,7 @@ namespace RentWisePro.Web.Models
 {
     public class PurchaseSheetPageVm
     {
+        public int SavedPropertyProfileId { get; set; }
         public long Zpid { get; set; }
         public int RentalListingId { get; set; }
         public string? StreetAddress { get; set; }
