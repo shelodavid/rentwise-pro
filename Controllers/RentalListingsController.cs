@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using RentWisePro.Web.Models;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     public class RentalListingsController : Controller
     {
         private const int DefaultPageSize = 24;

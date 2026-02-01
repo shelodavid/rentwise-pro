@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
@@ -6,6 +8,7 @@ using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
+    [Authorize]
     public class ForecastController : Controller
     {
         private readonly RentWiseProDbContext _dbContext;

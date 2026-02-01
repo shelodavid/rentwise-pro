@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RentWise Pro</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RentWisePro.Web.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="marketing-shell">
+        <header class="marketing-topbar">
+            <div class="container d-flex align-items-center justify-content-between">
+                <a class="app-brand" asp-controller="Home" asp-action="Index">RentWise Pro</a>
+                <div class="d-flex align-items-center gap-2">
+                    <a class="btn btn-outline-secondary btn-sm" asp-controller="Account" asp-action="Login">Log in</a>
+                    <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Sign up</a>
+                </div>
+            </div>
+        </header>
+
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
