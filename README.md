@@ -16,9 +16,9 @@ RentWise Pro is a C# ASP.NET MVC web application that helps prospective rental-p
 
 ## Quick Start
 1) Configure connection string in `appsettings.Development.json`
-2) Apply EF Core migrations:
-   - `dotnet ef database update -c RentWiseProDbContext`
-   - `dotnet ef database update -c AuthDbContext`
+2) Apply EF Core migrations (the repo has two DbContexts, so the context flag is required):
+   - `dotnet ef database update --context RentWiseProDbContext`
+   - `dotnet ef database update --context AuthDbContext`
 3) Run in Visual Studio (IIS Express) or `dotnet run`
 4) Visit `/` to view the public landing page and create your first user account.
 
