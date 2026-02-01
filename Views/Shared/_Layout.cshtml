@@ -15,10 +15,10 @@
         var currentZpid = ViewData["CurrentZpid"]?.ToString();
         var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentZpid)
             ? Url.Action("GeneratePurchaseSheet", "Home", new { zpid = currentZpid })
-            : Url.Action("Index", "Home");
+            : Url.Action("Index", "RentalListings");
         var forecastUrl = !string.IsNullOrWhiteSpace(currentZpid)
             ? Url.Action("Forecast", "Forecast", new { zpid = currentZpid })
-            : Url.Action("Index", "Home");
+            : Url.Action("Index", "RentalListings");
 
         string NavClass(string controller, string action)
         {
@@ -32,15 +32,18 @@
         <aside class="app-sidebar" aria-label="Primary">
             <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">RentWise Pro</a>
             <nav class="app-nav nav flex-column" role="navigation">
-                <a class="nav-link @NavClass("Home", "Index")" asp-controller="Home" asp-action="Index">
+                <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
                     Listings
                 </a>
-                <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
-                    Purchase Sheet
-                </a>
-                <a class="nav-link @NavClass("Forecast", "Forecast")" href="@forecastUrl">
-                    ROI Forecast
-                </a>
+                @if (!string.Equals(currentController, "RentalListings", StringComparison.OrdinalIgnoreCase))
+                {
+                    <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
+                        Purchase Sheet
+                    </a>
+                    <a class="nav-link @NavClass("Forecast", "Forecast")" href="@forecastUrl">
+                        ROI Forecast
+                    </a>
+                }
                 <a class="nav-link @NavClass("Home", "Privacy")" asp-controller="Home" asp-action="Privacy">
                     Privacy
                 </a>
