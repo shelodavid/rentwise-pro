@@ -103,28 +103,22 @@ else
     <div class="col-xl-8">
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                @await Html.PartialAsync("_StatCard", new ViewDataDictionary(ViewData)
-                {
-                    ["StatLabel"] = "Loan Amount",
-                    ["StatValue"] = Model.Assumptions.LoanAmount.ToString("C0"),
-                    ["StatHelper"] = "Based on saved terms"
-                })
+                @await Html.PartialAsync("_StatCard", (
+                    "Loan Amount",
+                    Model.Assumptions.LoanAmount.ToString("C0"),
+                    null))
             </div>
             <div class="col-md-4">
-                @await Html.PartialAsync("_StatCard", new ViewDataDictionary(ViewData)
-                {
-                    ["StatLabel"] = "Monthly Mortgage",
-                    ["StatValue"] = Model.Assumptions.MonthlyMortgage.ToString("C0"),
-                    ["StatHelper"] = "Principal + interest"
-                })
+                @await Html.PartialAsync("_StatCard", (
+                    "Monthly Mortgage",
+                    Model.Assumptions.MonthlyMortgage.ToString("C0"),
+                    null))
             </div>
             <div class="col-md-4">
-                @await Html.PartialAsync("_StatCard", new ViewDataDictionary(ViewData)
-                {
-                    ["StatLabel"] = "Cash Required",
-                    ["StatValue"] = Model.Assumptions.TotalCashInvested.ToString("C0"),
-                    ["StatHelper"] = "Down payment + closing"
-                })
+                @await Html.PartialAsync("_StatCard", (
+                    "Cash Required",
+                    Model.Assumptions.TotalCashInvested.ToString("C0"),
+                    null))
             </div>
         </div>
 
