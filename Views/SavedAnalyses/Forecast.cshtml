@@ -103,19 +103,19 @@ else
     <div class="col-xl-8">
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                @await Html.PartialAsync("_StatCard", (
+                @await Html.PartialAsync("_StatCard", new ValueTuple<string, string, string?>(
                     "Loan Amount",
                     Model.Assumptions.LoanAmount.ToString("C0"),
                     null), ViewData)
             </div>
             <div class="col-md-4">
-                @await Html.PartialAsync("_StatCard", (
+                @await Html.PartialAsync("_StatCard", new ValueTuple<string, string, string?>(
                     "Monthly Mortgage",
                     Model.Assumptions.MonthlyMortgage.ToString("C0"),
                     null), ViewData)
             </div>
             <div class="col-md-4">
-                @await Html.PartialAsync("_StatCard", (
+                @await Html.PartialAsync("_StatCard", new ValueTuple<string, string, string?>(
                     "Cash Required",
                     Model.Assumptions.TotalCashInvested.ToString("C0"),
                     null), ViewData)
