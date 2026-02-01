@@ -43,6 +43,7 @@ namespace RentWisePro.Web.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GeneratePurchaseSheet(int? savedPropertyProfileId)
         {
@@ -67,6 +68,7 @@ namespace RentWisePro.Web.Controllers
             return View(viewModel);
         }
 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GeneratePurchaseSheet(PurchaseSheetPageVm model)
@@ -190,6 +192,7 @@ namespace RentWisePro.Web.Controllers
                 SavedPropertyProfileId = savedProfile.SavedPropertyProfileId,
                 InvestmentProfileId = savedProfile.InvestmentProfileId,
                 RentalListingId = savedProfile.RentalListingId,
+                UserId = savedProfile.UserId,
                 DownpaymentPercentage = savedProfile.DownpaymentPercentage,
                 MortgageInterestRate = savedProfile.MortgageInterestRate,
                 TermYears = savedProfile.TermYears,
@@ -205,6 +208,7 @@ namespace RentWisePro.Web.Controllers
         private async Task<(SavedPropertyProfile? SavedProfile, RentalListing? Listing, InvestmentProfile? Profile)>
             LoadPurchaseSheetData(int savedPropertyProfileId, bool trackSavedProfile)
         {
+            var userId = CurrentUserId;
             IQueryable<SavedPropertyProfile> savedProfileQuery = _dbContext.SavedPropertyProfiles;
             if (!trackSavedProfile)
             {
@@ -212,7 +216,8 @@ namespace RentWisePro.Web.Controllers
             }
 
             var savedProfile = await savedProfileQuery
-                .FirstOrDefaultAsync(item => item.SavedPropertyProfileId == savedPropertyProfileId);
+                .FirstOrDefaultAsync(item => item.SavedPropertyProfileId == savedPropertyProfileId
+                                             && item.UserId == userId);
 
             if (savedProfile is null)
             {
@@ -223,9 +228,12 @@ namespace RentWisePro.Web.Controllers
                 .FirstOrDefaultAsync(item => item.RentalListingId == savedProfile.RentalListingId);
 
             var profile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(item => item.Id == savedProfile.InvestmentProfileId);
+                .FirstOrDefaultAsync(item => item.Id == savedProfile.InvestmentProfileId
+                                             && item.UserId == userId);
 
             return (savedProfile, listing, profile);
         }
+
+        private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     }
 }

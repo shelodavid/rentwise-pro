@@ -1,0 +1,27 @@
+@model RentWisePro.Web.Models.Account.ConfirmEmailViewModel
+@{
+    ViewData["Title"] = "Email confirmed";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @if (Model.Succeeded)
+                    {
+                        <h1 class="h4 mb-3">Email confirmed</h1>
+                        <p class="text-muted">Thanks for confirming your email. You can now sign in.</p>
+                        <a class="btn btn-primary" asp-controller="Account" asp-action="Login">Go to login</a>
+                    }
+                    else
+                    {
+                        <h1 class="h4 mb-3">Confirmation failed</h1>
+                        <p class="text-muted">We couldn't confirm your email. The link may have expired or been used already.</p>
+                        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Register">Return to registration</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
