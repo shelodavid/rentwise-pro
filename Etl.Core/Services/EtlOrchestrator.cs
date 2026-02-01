@@ -7,7 +7,7 @@ using RentWisePro.Etl.Core.Options;
 
 namespace RentWisePro.Etl.Core.Services;
 
-public class EtlOrchestrator
+public class EtlOrchestrator : IEtlOrchestrator
 {
     private readonly IEnumerable<IListingSource> _sources;
     private readonly IEtlRepository _repository;

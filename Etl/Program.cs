@@ -36,7 +36,7 @@ builder.Services.Configure<EtlExecutionOptions>(options =>
 });
 
 var connectionString = builder.Configuration.GetConnectionString("RentWiseProDb") ??
-                       builder.Configuration["ConnectionStrings:RentWisePro"];
+                       builder.Configuration["ConnectionStrings:RentWiseProDb"];
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
@@ -69,7 +69,7 @@ builder.Services.AddSingleton<IPhotoStorage, LocalPhotoStorage>();
 
 builder.Services.AddHttpClient<PhotoDownloadService>();
 
-builder.Services.AddSingleton<EtlOrchestrator>();
+builder.Services.AddScoped<IEtlOrchestrator, EtlOrchestrator>();
 builder.Services.AddHostedService<EtlWorker>();
 builder.Services.AddHostedService<WorkQueueWorker>();
 
@@ -85,9 +85,22 @@ static void ApplyExecutionOptions(EtlExecutionOptions options, string[] args)
         {
             options.RunOnce = true;
         }
+        else if (string.Equals(arg, "--run-once", StringComparison.OrdinalIgnoreCase))
+        {
+            options.RunOnce = true;
+        }
         else if (string.Equals(arg, "--queueOnly", StringComparison.OrdinalIgnoreCase))
         {
             options.QueueOnly = true;
+        }
+        else if (string.Equals(arg, "--queue-only", StringComparison.OrdinalIgnoreCase))
+        {
+            options.QueueOnly = true;
+        }
+        else if (string.Equals(arg, "--queue-once", StringComparison.OrdinalIgnoreCase))
+        {
+            options.QueueOnly = true;
+            options.QueueRunOnce = true;
         }
         else if (arg.StartsWith("--source=", StringComparison.OrdinalIgnoreCase))
         {
