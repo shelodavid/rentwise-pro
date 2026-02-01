@@ -5,7 +5,7 @@
     ViewData["PageTitle"] = "ROI Forecast";
     ViewData["PageSubtitle"] = "Use the forecast to validate monthly returns and long-term ROI.";
     ViewData["PageMeta"] = $"ZPID {Model.Listing.Zpid}";
-    ViewData["CurrentZpid"] = Model.Listing.Zpid;
+    ViewData["CurrentSavedPropertyProfileId"] = Model.SavedPropertyProfileId;
 }
 
 @await Html.PartialAsync("_PageHeader")

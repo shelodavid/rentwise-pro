@@ -7,6 +7,17 @@
 
 @await Html.PartialAsync("_PageHeader")
 
+@{
+    var statusMessage = TempData["StatusMessage"] as string;
+}
+
+@if (!string.IsNullOrWhiteSpace(statusMessage))
+{
+    <div class="alert alert-warning" role="alert">
+        @statusMessage
+    </div>
+}
+
 @if (Model.Listings.Count == 0)
 {
     <div class="alert alert-info">
