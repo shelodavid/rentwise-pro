@@ -71,21 +71,4 @@ namespace RentWisePro.Web.Models
         public decimal HoaEstimate { get; set; }
     }
 
-    public class HomeIndexVm
-    {
-        public List<PurchaseSheetListingVm> Listings { get; set; } = new();
-    }
-
-    public class PurchaseSheetListingVm
-    {
-        public long Zpid { get; set; }
-        public string? StreetAddress { get; set; }
-        public string? City { get; set; }
-        public string? State { get; set; }
-        public string? ZipCode { get; set; }
-        public decimal? Price { get; set; }
-        public int? Bedrooms { get; set; }
-        public decimal? Bathrooms { get; set; }
-        public string? ImgSrc { get; set; }
-    }
 }

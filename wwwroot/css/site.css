@@ -321,6 +321,18 @@ img {
   font-weight: 600;
 }
 
+.user-chip {
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-weight: 600;
+  color: var(--rw-text);
+}
+
+.user-email {
+  font-size: 0.85rem;
+}
+
 .collapse-toggle {
   background: transparent;
   border: none;
@@ -465,4 +477,119 @@ img {
 
 .listing-pagination {
   margin-top: 2rem;
+}
+
+.marketing-shell {
+  min-height: 100vh;
+  background: var(--rw-bg);
+}
+
+.marketing-topbar {
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1010;
+}
+
+.marketing-hero {
+  padding: 4rem 0 3rem;
+}
+
+.marketing-hero-card {
+  background: var(--rw-surface);
+  border-radius: var(--rw-radius);
+  border: 1px solid var(--rw-border);
+  box-shadow: var(--rw-shadow);
+  overflow: hidden;
+}
+
+.hero-card-header {
+  background: var(--rw-surface-alt);
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+}
+
+.hero-card-body {
+  padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.hero-metric .label {
+  font-size: 0.8rem;
+  color: var(--rw-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero-metric .value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.hero-card-footer {
+  border-top: 1px solid var(--rw-border);
+  padding: 0.9rem 1.5rem;
+  color: var(--rw-muted);
+  background: var(--rw-surface-alt);
+}
+
+.marketing-section {
+  padding: 3rem 0;
+}
+
+.section-header {
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  font-weight: 700;
+}
+
+.feature-tile {
+  height: 100%;
+}
+
+.feature-tile h5 {
+  font-weight: 600;
+}
+
+.step-card {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius-sm);
+  padding: 1.5rem;
+  box-shadow: var(--rw-shadow-soft);
+  height: 100%;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(29, 78, 216, 0.15);
+  color: var(--rw-primary-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.marketing-footer {
+  border-top: 1px solid var(--rw-border);
+  padding: 1.5rem 0;
+  background: var(--rw-surface);
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius);
+  box-shadow: var(--rw-shadow-soft);
+  padding: 2rem;
 }
