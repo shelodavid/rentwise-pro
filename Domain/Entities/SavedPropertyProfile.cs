@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RentWisePro.Web.Domain.Entities
@@ -6,26 +7,29 @@ namespace RentWisePro.Web.Domain.Entities
     [Table("SavedPropertyProfiles")]
     public class SavedPropertyProfile
     {
+        // Single identity primary key (SQL Server allows only ONE identity column)
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int SavedPropertyProfileId { get; set; }
 
-        // Relationships
+        // Relationships (FKs)
         [Required]
         public int InvestmentProfileId { get; set; }
 
         [Required]
         public int RentalListingId { get; set; }
 
-        // “Snapshot” of assumptions at save-time (so forecasts are stable)
+        // Snapshot of assumptions at save-time (so forecasts are stable)
         [Column(TypeName = "decimal(18,4)")]
         public decimal DownpaymentPercentage { get; set; }
 
         [Column(TypeName = "decimal(18,4)")]
         public decimal MortgageInterestRate { get; set; }
 
+        [Required]
         public int TermYears { get; set; }
 
-        // Closing cost overrides (optional)
+        // Optional overrides
         [Column(TypeName = "decimal(18,2)")]
         public decimal? ClosingCostOverride { get; set; }
 
@@ -42,10 +46,14 @@ namespace RentWisePro.Web.Domain.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal? MonthlyOtherExpensesOverride { get; set; }
 
+        [Required]
         public DateTime SavedAtUtc { get; set; } = DateTime.UtcNow;
 
         // Navigation
+        [ForeignKey(nameof(InvestmentProfileId))]
         public InvestmentProfile InvestmentProfile { get; set; } = null!;
+
+        [ForeignKey(nameof(RentalListingId))]
         public RentalListing RentalListing { get; set; } = null!;
     }
 }

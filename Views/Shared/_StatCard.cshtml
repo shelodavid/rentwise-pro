@@ -1,14 +1,17 @@
-@{
-    var label = ViewData["StatLabel"] as string ?? string.Empty;
-    var value = ViewData["StatValue"] as string ?? string.Empty;
-    var helper = ViewData["StatHelper"] as string;
-}
+@model (string Label, string Value, string? IconClass)
 
-<div class="stat-card">
-    <div class="label">@label</div>
-    <div class="value">@value</div>
-    @if (!string.IsNullOrWhiteSpace(helper))
-    {
-        <div class="text-muted small">@helper</div>
-    }
+<div class="card shadow-sm h-100 stat-card">
+    <div class="card-body d-flex align-items-center justify-content-between">
+        <div>
+            <div class="text-uppercase text-muted small fw-semibold">@Model.Label</div>
+            <div class="h4 mb-0">@Model.Value</div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.IconClass))
+        {
+            <span class="text-primary">
+                <i class="@Model.IconClass fa-2x"></i>
+            </span>
+        }
+    </div>
 </div>
