@@ -36,19 +36,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<ForecastCalculationService>();
 builder.Services.AddScoped<InvestmentProfileResolver>();
-builder.Services.AddScoped<InvestmentProfileSeeder>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider.GetRequiredService<InvestmentProfileSeeder>();
-    await seeder.EnsureSeededAsync();
-}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

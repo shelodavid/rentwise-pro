@@ -11,9 +11,10 @@ using RentWisePro.Web.Data;
 namespace RentWisePro.Web.Migrations
 {
     [DbContext(typeof(RentWiseProDbContext))]
-    partial class RentWiseProDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260405120000_AddUserScopedProfilesAndSavedAnalyses")]
+    partial class AddUserScopedProfilesAndSavedAnalyses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
