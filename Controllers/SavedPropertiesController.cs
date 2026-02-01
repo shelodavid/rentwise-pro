@@ -20,7 +20,12 @@ namespace RentWisePro.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartAnalysis(StartAnalysisRequest request)
         {
-            if (request == null || (!request.Zpid.HasValue && !request.RentalListingId.HasValue))
+            if (request == null || !ModelState.IsValid)
+            {
+                return BadRequest("A listing identifier is required.");
+            }
+
+            if (!request.Zpid.HasValue && !request.RentalListingId.HasValue)
             {
                 return BadRequest("A listing identifier is required.");
             }
@@ -35,15 +40,17 @@ namespace RentWisePro.Web.Controllers
                 return NotFound("Listing not found.");
             }
 
-            var investmentProfile = await _dbContext.InvestmentProfiles
-                .FirstOrDefaultAsync(profile => profile.Id == 1);
+            const int defaultInvestmentProfileId = 1;
+
+            var investmentProfile = await _dbContext.InvestmentProfiles.AsNoTracking()
+                .FirstOrDefaultAsync(profile => profile.Id == defaultInvestmentProfileId);
 
             if (investmentProfile is null)
             {
                 return NotFound("Default investment profile not found.");
             }
 
-            var savedProfile = await _dbContext.SavedPropertyProfiles
+            var savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
                 .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId
                                                 && profile.InvestmentProfileId == investmentProfile.Id);
 
@@ -60,7 +67,21 @@ namespace RentWisePro.Web.Controllers
                 };
 
                 _dbContext.SavedPropertyProfiles.Add(savedProfile);
-                await _dbContext.SaveChangesAsync();
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
+                        .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId
+                                                        && profile.InvestmentProfileId == investmentProfile.Id);
+
+                    if (savedProfile is null)
+                    {
+                        throw;
+                    }
+                }
             }
 
             return RedirectToAction("GeneratePurchaseSheet", "Home",
