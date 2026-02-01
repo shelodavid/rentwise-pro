@@ -9,7 +9,6 @@ using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Controllers
 {
-    [Authorize]
     [Route("SavedProperties")]
     [Authorize]
     public class SavedPropertiesController : Controller
@@ -43,12 +42,7 @@ namespace RentWisePro.Web.Controllers
             }
 
             var userId = CurrentUserId;
-            var investmentProfile = await _investmentProfileResolver.GetDefaultAsync(userId);
-
-            if (investmentProfile is null)
-            {
-                return NotFound("Default investment profile not found.");
-            }
+            var investmentProfile = await _investmentProfileResolver.EnsureDefaultAsync(userId);
 
             var savedProfile = await _dbContext.SavedPropertyProfiles
                 .FirstOrDefaultAsync(profile => profile.RentalListingId == listing.RentalListingId

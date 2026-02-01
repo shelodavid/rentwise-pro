@@ -14,8 +14,8 @@ namespace RentWisePro.Web.Domain.Entities
 
         public bool IsDefault { get; set; }
 
-        [MaxLength(450)]
-        public string? UserId { get; set; }
+        [Required, MaxLength(450)]
+        public string UserId { get; set; } = "";
 
         // Purchase assumptions
         [Column(TypeName = "decimal(18,2)")]
