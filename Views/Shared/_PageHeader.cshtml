@@ -1,8 +1,14 @@
-@model (string Title, string? Subtitle, string? Meta)
+@model object
 @{
-    var title = Model.Title;
-    var subtitle = Model.Subtitle;
-    var meta = Model.Meta;
+    var title = ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? string.Empty;
+    var subtitle = ViewData["PageSubtitle"] as string;
+    var meta = ViewData["PageMeta"] as string;
+    if (Model is ValueTuple<string, string?, string?> header)
+    {
+        title = header.Item1;
+        subtitle = header.Item2;
+        meta = header.Item3;
+    }
     var actionLabel = ViewData["PageActionLabel"] as string;
     var actionUrl = ViewData["PageActionUrl"] as string;
 }
