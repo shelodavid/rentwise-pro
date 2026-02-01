@@ -1,0 +1,29 @@
+@model RentWisePro.Web.Models.InvestmentProfileVm
+
+@{
+    ViewData["Title"] = "Edit Investment Profile";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Edit investment profile</h1>
+        <p class="subtitle">Update your assumptions to keep purchase sheets and ROI forecasts accurate.</p>
+    </div>
+</div>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Id)
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <partial name="_ProfileForm" model="Model" />
+
+    <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

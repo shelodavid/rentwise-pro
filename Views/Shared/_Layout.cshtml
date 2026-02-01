@@ -33,14 +33,23 @@
         <aside class="app-sidebar" aria-label="Primary">
             <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">RentWise Pro</a>
             <nav class="app-nav nav flex-column" role="navigation">
-                <a class="nav-link @NavClass("Home", "Index")" asp-controller="Home" asp-action="Index">
+                <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
                     Listings
                 </a>
-                <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
-                    Purchase Sheet
+                <a class="nav-link @NavClass("InvestmentProfiles", "Index")" asp-controller="InvestmentProfiles" asp-action="Index">
+                    Investment Profile
                 </a>
-                <a class="nav-link @NavClass("Forecast", "Forecast")" href="@forecastUrl">
-                    ROI Forecast
+                @if (hasSavedPropertyProfile)
+                {
+                    <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
+                        Purchase Sheet
+                    </a>
+                    <a class="nav-link @NavClass("Forecast", "Forecast")" href="@forecastUrl">
+                        ROI Forecast
+                    </a>
+                }
+                <a class="nav-link @NavClass("SavedAnalyses", "Index")" asp-controller="SavedAnalyses" asp-action="Index">
+                    Saved Analyses
                 </a>
                 <a class="nav-link @NavClass("Home", "Privacy")" asp-controller="Home" asp-action="Privacy">
                     Privacy
