@@ -3,7 +3,7 @@
     ViewData["Title"] = "Purchase Sheet";
     ViewData["PageTitle"] = "Purchase Sheet";
     ViewData["PageSubtitle"] = "Review financing assumptions and upfront costs before committing capital.";
-    ViewData["CurrentZpid"] = Model.Zpid;
+    ViewData["CurrentSavedPropertyProfileId"] = Model.SavedPropertyProfileId;
 }
 
 @await Html.PartialAsync("_PageHeader")
@@ -45,6 +45,7 @@
     <div class="col-xl-8">
         <form asp-action="GeneratePurchaseSheet" method="post" class="card">
             @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="SavedPropertyProfileId" />
             <input type="hidden" asp-for="Zpid" />
             <div class="card-body">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
