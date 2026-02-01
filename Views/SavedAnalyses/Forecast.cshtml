@@ -1,0 +1,183 @@
+@model RentWisePro.Web.Models.Forecast.SavedAnalysisForecastVm
+
+@{
+    ViewData["Title"] = "ROI Forecast";
+    ViewData["PageTitle"] = "ROI Forecast";
+    ViewData["PageSubtitle"] = Model.LocationLine;
+    ViewData["PageMeta"] = Model.InvestmentProfileName;
+}
+
+@await Html.PartialAsync("_PageHeader", (
+    ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? string.Empty,
+    ViewData["PageSubtitle"] as string,
+    ViewData["PageMeta"] as string))
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-outline-secondary" asp-controller="SavedAnalyses" asp-action="Details" asp-route-id="@Model.SavedPropertyProfileId">
+        Back to Saved Analysis
+    </a>
+    <a class="btn btn-primary" asp-controller="Home" asp-action="GeneratePurchaseSheet" asp-route-savedPropertyProfileId="@Model.SavedPropertyProfileId">
+        View Purchase Sheet
+    </a>
+</div>
+
+@await Html.PartialAsync("_KpiRibbon", Model.Kpis)
+
+@if (Model.UsingDefaultInvestmentProfile)
+{
+    <div class="alert alert-warning mt-3" role="status">
+        @Model.InvestmentProfileNote
+    </div>
+}
+else
+{
+    <p class="text-muted mt-3 mb-0">@Model.InvestmentProfileNote</p>
+}
+
+<div class="row g-4 mt-1">
+    <div class="col-xl-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="text-muted text-uppercase small">Property Snapshot</div>
+                <h4 class="mt-2 mb-1">@Model.AddressLine</h4>
+                <p class="text-muted mb-3">@Model.LocationLine</p>
+                @if (!string.IsNullOrWhiteSpace(Model.Listing.ImgSrc))
+                {
+                    <img src="@Model.Listing.ImgSrc" alt="Listing image" class="img-fluid rounded" />
+                }
+                <div class="mt-3">
+                    <span class="badge bg-light text-dark border">@Model.Listing.PropertyType</span>
+                    @if (Model.Listing.Bedrooms.HasValue || Model.Listing.Bathrooms.HasValue)
+                    {
+                        <span class="badge bg-light text-dark border">@Model.Listing.Bedrooms bd · @Model.Listing.Bathrooms ba</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Snapshot assumptions</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Down payment</th>
+                                <td>@Model.SnapshotAssumptions.DownpaymentPercentage.ToString("0.##")%</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Interest rate</th>
+                                <td>@Model.SnapshotAssumptions.MortgageInterestRate.ToString("0.##")%</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Loan term</th>
+                                <td>@Model.SnapshotAssumptions.TermYears yrs</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Closing cost override</th>
+                                <td>@(Model.SnapshotAssumptions.ClosingCostOverride.HasValue ? Model.SnapshotAssumptions.ClosingCostOverride.Value.ToString("C0") : "—")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Renovation budget</th>
+                                <td>@(Model.SnapshotAssumptions.RenovationBudget.HasValue ? Model.SnapshotAssumptions.RenovationBudget.Value.ToString("C0") : "—")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Other upfront costs</th>
+                                <td>@(Model.SnapshotAssumptions.OtherUpfrontCosts.HasValue ? Model.SnapshotAssumptions.OtherUpfrontCosts.Value.ToString("C0") : "—")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Monthly rent override</th>
+                                <td>@(Model.SnapshotAssumptions.MonthlyRentOverride.HasValue ? Model.SnapshotAssumptions.MonthlyRentOverride.Value.ToString("C0") : "—")</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Monthly other expenses override</th>
+                                <td>@(Model.SnapshotAssumptions.MonthlyOtherExpensesOverride.HasValue ? Model.SnapshotAssumptions.MonthlyOtherExpensesOverride.Value.ToString("C0") : "—")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                @await Html.PartialAsync("_StatCard", (
+                    "Loan Amount",
+                    Model.Assumptions.LoanAmount.ToString("C0"),
+                    null))
+            </div>
+            <div class="col-md-4">
+                @await Html.PartialAsync("_StatCard", (
+                    "Monthly Mortgage",
+                    Model.Assumptions.MonthlyMortgage.ToString("C0"),
+                    null))
+            </div>
+            <div class="col-md-4">
+                @await Html.PartialAsync("_StatCard", (
+                    "Cash Required",
+                    Model.Assumptions.TotalCashInvested.ToString("C0"),
+                    null))
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Assumption Summary</div>
+            <div class="card-body">
+                <table class="table-lite">
+                    <tr>
+                        <td>Monthly Rent</td>
+                        <td>@Model.Assumptions.MonthlyRent.ToString("C0")</td>
+                    </tr>
+                    <tr>
+                        <td>Monthly Non-Mortgage</td>
+                        <td>@Model.Assumptions.MonthlyNonMortgageExpenses.ToString("C0")</td>
+                    </tr>
+                    <tr>
+                        <td>Total Monthly Expenses</td>
+                        <td>@Model.Assumptions.TotalMonthlyExpenses.ToString("C0")</td>
+                    </tr>
+                    <tr>
+                        <td>Annual NOI</td>
+                        <td>@((Model.Assumptions.MonthlyRent - Model.Assumptions.MonthlyNonMortgageExpenses) * 12m).ToString("C0")</td>
+                    </tr>
+                    <tr>
+                        <td>Annual Debt Service</td>
+                        <td>@((Model.Assumptions.MonthlyMortgage + Model.Assumptions.MonthlyPmi) * 12m).ToString("C0")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">ROI projection horizons</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Horizon</th>
+                                <th scope="col">Net Cash Flow</th>
+                                <th scope="col">Cash-on-Cash %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var projection in Model.Projections)
+                            {
+                                <tr>
+                                    <td>@projection.Label</td>
+                                    <td>@projection.NetCashflow.ToString("C0")</td>
+                                    <td>@projection.CashOnCashReturnPercent.ToString("0.0")%</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted small mt-2 mb-0">
+                    Projections apply the saved vacancy and property management assumptions, if available.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
