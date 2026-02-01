@@ -9,10 +9,10 @@
 @await Html.PartialAsync("_PageHeader")
 
 <div class="d-flex flex-wrap gap-2 mb-4">
-    <a class="btn btn-primary" asp-controller="Home" asp-action="GeneratePurchaseSheet" asp-route-savedProfileId="@Model.SavedPropertyProfileId">
+    <a class="btn btn-primary" asp-controller="Home" asp-action="GeneratePurchaseSheet" asp-route-savedPropertyProfileId="@Model.SavedPropertyProfileId">
         View Purchase Sheet
     </a>
-    <a class="btn btn-outline-primary" asp-controller="Forecast" asp-action="Forecast" asp-route-savedProfileId="@Model.SavedPropertyProfileId">
+    <a class="btn btn-outline-primary" asp-controller="SavedAnalyses" asp-action="Forecast" asp-route-id="@Model.SavedPropertyProfileId">
         View ROI Forecast
     </a>
 </div>

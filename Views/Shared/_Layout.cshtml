@@ -18,7 +18,7 @@
             ? Url.Action("GeneratePurchaseSheet", "Home", new { savedPropertyProfileId = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
         var forecastUrl = hasSavedPropertyProfile
-            ? Url.Action("Forecast", "Forecast", new { savedPropertyProfileId = currentSavedPropertyProfileId })
+            ? Url.Action("Forecast", "SavedAnalyses", new { id = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
 
         string NavClass(string controller, string action)
@@ -44,7 +44,7 @@
                     <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">
                         Purchase Sheet
                     </a>
-                    <a class="nav-link @NavClass("Forecast", "Forecast")" href="@forecastUrl">
+                    <a class="nav-link @NavClass("SavedAnalyses", "Forecast")" href="@forecastUrl">
                         ROI Forecast
                     </a>
                 }
