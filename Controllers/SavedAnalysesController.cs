@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +19,19 @@ namespace RentWisePro.Web.Controllers
     {
         private readonly RentWiseProDbContext _dbContext;
         private readonly ForecastCalculationService _forecastCalculationService;
+        private readonly ClosingDisclosureCalculationService _closingDisclosureCalculationService;
+        private readonly InvestmentProfileResolver _investmentProfileResolver;
 
         public SavedAnalysesController(
             RentWiseProDbContext dbContext,
-            ForecastCalculationService forecastCalculationService)
+            ForecastCalculationService forecastCalculationService,
+            ClosingDisclosureCalculationService closingDisclosureCalculationService,
+            InvestmentProfileResolver investmentProfileResolver)
         {
             _dbContext = dbContext;
             _forecastCalculationService = forecastCalculationService;
+            _closingDisclosureCalculationService = closingDisclosureCalculationService;
+            _investmentProfileResolver = investmentProfileResolver;
         }
 
         [HttpGet("")]
@@ -58,7 +66,7 @@ namespace RentWisePro.Web.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, [FromQuery] int? profileId)
         {
             var userId = CurrentUserId;
             var savedProfile = await _dbContext.SavedPropertyProfiles
@@ -74,6 +82,24 @@ namespace RentWisePro.Web.Controllers
                 return View("NotFound");
             }
 
+            var profiles = await _dbContext.InvestmentProfiles
+                .AsNoTracking()
+                .Where(profile => profile.UserId == userId)
+                .OrderBy(profile => profile.InvestmentProfileName)
+                .ToListAsync();
+
+            if (!profiles.Any())
+            {
+                var defaultProfile = await _investmentProfileResolver.EnsureDefaultAsync(userId);
+                profiles = new List<InvestmentProfile> { defaultProfile };
+            }
+
+            var scenarioProfile = profileId.HasValue
+                ? profiles.FirstOrDefault(profile => profile.Id == profileId.Value)
+                : null;
+
+            scenarioProfile ??= savedProfile.InvestmentProfile ?? profiles.FirstOrDefault();
+
             var listing = savedProfile.RentalListing;
             var addressLine = listing.StreetAddress ?? "Unknown address";
             var locationLine = string.Join(", ", new[]
@@ -83,6 +109,10 @@ namespace RentWisePro.Web.Controllers
                 listing.ZipCode
             }.Where(part => !string.IsNullOrWhiteSpace(part)));
 
+            var closingDisclosure = scenarioProfile is null
+                ? new ClosingDisclosureSummaryVm()
+                : _closingDisclosureCalculationService.BuildSummary(listing, savedProfile, scenarioProfile);
+
             var viewModel = new SavedAnalysisDetailsVm
             {
                 SavedPropertyProfileId = savedProfile.SavedPropertyProfileId,
@@ -90,7 +120,20 @@ namespace RentWisePro.Web.Controllers
                 LocationLine = locationLine,
                 Price = listing.Price,
                 SavedAtUtc = savedProfile.SavedAtUtc,
-                InvestmentProfileName = savedProfile.InvestmentProfile.InvestmentProfileName,
+                SnapshotInvestmentProfileName = savedProfile.InvestmentProfile?.InvestmentProfileName
+                    ?? "Snapshot assumptions",
+                ScenarioInvestmentProfileName = scenarioProfile?.InvestmentProfileName
+                    ?? "Snapshot assumptions",
+                ScenarioInvestmentProfileId = scenarioProfile?.Id ?? 0,
+                IsScenarioProfileDifferent = scenarioProfile is not null
+                                            && savedProfile.InvestmentProfile is not null
+                                            && scenarioProfile.Id != savedProfile.InvestmentProfile.Id,
+                ScenarioProfiles = profiles.Select(profile => new InvestmentProfileOptionVm
+                {
+                    Id = profile.Id,
+                    Name = profile.InvestmentProfileName,
+                    IsDefault = profile.IsDefault
+                }).ToList(),
                 Assumptions = new SavedAnalysisAssumptionsVm
                 {
                     DownpaymentPercentage = savedProfile.DownpaymentPercentage,
@@ -101,7 +144,8 @@ namespace RentWisePro.Web.Controllers
                     OtherUpfrontCosts = savedProfile.OtherUpfrontCosts,
                     MonthlyRentOverride = savedProfile.MonthlyRentOverride,
                     MonthlyOtherExpensesOverride = savedProfile.MonthlyOtherExpensesOverride
-                }
+                },
+                ClosingDisclosure = closingDisclosure
             };
 
             ViewData["CurrentSavedPropertyProfileId"] = savedProfile.SavedPropertyProfileId;
