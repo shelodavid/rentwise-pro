@@ -5,7 +5,17 @@
     ViewData["PageSubtitle"] = "Select a listing to build a purchase sheet or ROI forecast.";
 }
 
-@await Html.PartialAsync("_PageHeader")
+@await Html.PartialAsync("_PageHeader", (
+    ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? string.Empty,
+    ViewData["PageSubtitle"] as string,
+    ViewData["PageMeta"] as string))
+
+@if (TempData["StatusMessage"] is string statusMessage)
+{
+    <div class="alert alert-warning" role="alert">
+        @statusMessage
+    </div>
+}
 
 @if (Model.Listings.Count == 0)
 {

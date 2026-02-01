@@ -12,12 +12,12 @@
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-        var currentZpid = ViewData["CurrentZpid"]?.ToString();
-        var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentZpid)
-            ? Url.Action("GeneratePurchaseSheet", "Home", new { zpid = currentZpid })
+        var currentSavedPropertyProfileId = ViewData["CurrentSavedPropertyProfileId"]?.ToString();
+        var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId)
+            ? Url.Action("GeneratePurchaseSheet", "Home", new { savedPropertyProfileId = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
-        var forecastUrl = !string.IsNullOrWhiteSpace(currentZpid)
-            ? Url.Action("Forecast", "Forecast", new { zpid = currentZpid })
+        var forecastUrl = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId)
+            ? Url.Action("Forecast", "Forecast", new { savedPropertyProfileId = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
 
         string NavClass(string controller, string action)
