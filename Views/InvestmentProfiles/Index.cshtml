@@ -1,0 +1,74 @@
+@model IReadOnlyList<RentWisePro.Web.Domain.Entities.InvestmentProfile>
+
+@{
+    ViewData["Title"] = "Investment Profiles";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Investment Profiles</h1>
+        <p class="subtitle">Manage the assumptions used for purchase sheets and ROI forecasts.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-action="Create">New profile</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <div class="text-center">
+                <h5 class="mb-2">No profiles yet.</h5>
+                <p class="text-muted mb-0">Create a profile to start improving your ROI assumptions.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Profile</th>
+                            <th>Down payment</th>
+                            <th>Term</th>
+                            <th>Interest</th>
+                            <th>Property tax</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var profile in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@profile.InvestmentProfileName</div>
+                                    @if (profile.InvestmentProfileName == "Default")
+                                    {
+                                        <span class="badge bg-primary-subtle text-primary border">Default</span>
+                                    }
+                                </td>
+                                <td>@profile.DownpaymentPercentage.ToString("0.##")%</td>
+                                <td>@profile.TermYears yrs</td>
+                                <td>@profile.MortgageInterestRate.ToString("0.##")%</td>
+                                <td>@profile.PropertyTaxRate.ToString("0.##")%</td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@profile.Id">Edit</a>
+                                        @if (profile.InvestmentProfileName != "Default")
+                                        {
+                                            <form asp-action="SetDefault" asp-route-id="@profile.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">Set default</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

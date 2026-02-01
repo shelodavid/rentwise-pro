@@ -1,0 +1,28 @@
+@model RentWisePro.Web.Models.InvestmentProfileVm
+
+@{
+    ViewData["Title"] = "New Investment Profile";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Create investment profile</h1>
+        <p class="subtitle">Capture your financing and closing assumptions for accurate ROI forecasts.</p>
+    </div>
+</div>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <partial name="_ProfileForm" model="Model" />
+
+    <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">Save profile</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
