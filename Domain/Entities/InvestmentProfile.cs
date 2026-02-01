@@ -14,6 +14,9 @@ namespace RentWisePro.Web.Domain.Entities
 
         public bool IsDefault { get; set; }
 
+        [MaxLength(450)]
+        public string? UserId { get; set; }
+
         // Purchase assumptions
         [Column(TypeName = "decimal(18,2)")]
         public decimal DownpaymentPercentage { get; set; } = 20m;
