@@ -84,6 +84,37 @@ namespace RentWisePro.Web.Services
             };
         }
 
+        public IReadOnlyList<ForecastHorizonProjectionVm> BuildHorizonProjections(
+            ForecastCalculationResult calculation)
+        {
+            var horizons = new[]
+            {
+                new ForecastHorizonProjectionVm { Label = "6 months", Months = 6 },
+                new ForecastHorizonProjectionVm { Label = "12 months", Months = 12 },
+                new ForecastHorizonProjectionVm { Label = "1 year", Months = 12 },
+                new ForecastHorizonProjectionVm { Label = "5 years", Months = 60 }
+            };
+
+            var monthlyCashflow = calculation.Kpis.MonthlyCashflow;
+            var totalCashInvested = calculation.Assumptions.TotalCashInvested;
+
+            return horizons.Select(horizon =>
+            {
+                var netCashflow = monthlyCashflow * horizon.Months;
+                var cashOnCash = totalCashInvested > 0m
+                    ? (netCashflow / totalCashInvested) * 100m
+                    : 0m;
+
+                return new ForecastHorizonProjectionVm
+                {
+                    Label = horizon.Label,
+                    Months = horizon.Months,
+                    NetCashflow = netCashflow,
+                    CashOnCashReturnPercent = cashOnCash
+                };
+            }).ToList();
+        }
+
         private static decimal EstimateClosingCosts(decimal price, decimal loanAmount, InvestmentProfile profile)
         {
             var percentCosts = price * ((profile.ClosingCostsPercentage ?? 0m) / 100m);
