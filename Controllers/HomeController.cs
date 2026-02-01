@@ -57,14 +57,15 @@ namespace RentWisePro.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GeneratePurchaseSheet(int? savedPropertyProfileId)
+        public async Task<IActionResult> GeneratePurchaseSheet(int? savedPropertyProfileId, int? savedProfileId)
         {
-            if (!savedPropertyProfileId.HasValue || savedPropertyProfileId.Value <= 0)
+            var resolvedProfileId = savedProfileId ?? savedPropertyProfileId;
+            if (!resolvedProfileId.HasValue || resolvedProfileId.Value <= 0)
             {
                 return RedirectToListingsWithMessage();
             }
 
-            var dataBundle = await LoadPurchaseSheetData(savedPropertyProfileId.Value, trackSavedProfile: false);
+            var dataBundle = await LoadPurchaseSheetData(resolvedProfileId.Value, trackSavedProfile: false);
             if (dataBundle.SavedProfile is null)
             {
                 return RedirectToListingsWithMessage();
