@@ -1,0 +1,147 @@
+@model RentWisePro.Web.Models.InvestmentProfileVm
+
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Profile settings</h5>
+                <div class="mb-3">
+                    <label asp-for="InvestmentProfileName" class="form-label"></label>
+                    <input asp-for="InvestmentProfileName" class="form-control" />
+                    <span asp-validation-for="InvestmentProfileName" class="text-danger small"></span>
+                </div>
+                <div class="form-text">Profiles named "Default" are used when starting new analyses.</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Financing assumptions</h5>
+                <div class="mb-3">
+                    <label asp-for="DownpaymentPercentage" class="form-label"></label>
+                    <input asp-for="DownpaymentPercentage" class="form-control" type="number" step="0.01" min="0" max="100" />
+                    <span asp-validation-for="DownpaymentPercentage" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="TermYears" class="form-label"></label>
+                    <input asp-for="TermYears" class="form-control" type="number" step="1" min="5" max="40" />
+                    <span asp-validation-for="TermYears" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="MortgageInterestRate" class="form-label"></label>
+                    <input asp-for="MortgageInterestRate" class="form-control" type="number" step="0.01" min="0" max="25" />
+                    <span asp-validation-for="MortgageInterestRate" class="text-danger small"></span>
+                </div>
+                <div class="mb-0">
+                    <label asp-for="PMIRate" class="form-label"></label>
+                    <input asp-for="PMIRate" class="form-control" type="number" step="0.01" min="0" max="25" />
+                    <span asp-validation-for="PMIRate" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Monthly recurring costs</h5>
+                <div class="mb-3">
+                    <label asp-for="PropertyTaxRate" class="form-label"></label>
+                    <input asp-for="PropertyTaxRate" class="form-control" type="number" step="0.01" min="0" max="25" />
+                    <div class="form-text">Annual percent (example: 1.10).</div>
+                    <span asp-validation-for="PropertyTaxRate" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="HomeownersInsuranceAnnual" class="form-label"></label>
+                    <input asp-for="HomeownersInsuranceAnnual" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="HomeownersInsuranceAnnual" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="VacancyRate" class="form-label"></label>
+                    <input asp-for="VacancyRate" class="form-control" type="number" step="0.01" min="0" max="100" />
+                    <span asp-validation-for="VacancyRate" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PropertyManagementFeePct" class="form-label"></label>
+                    <input asp-for="PropertyManagementFeePct" class="form-control" type="number" step="0.01" min="0" max="100" />
+                    <span asp-validation-for="PropertyManagementFeePct" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="MonthlyMaintenanceBudget" class="form-label"></label>
+                    <input asp-for="MonthlyMaintenanceBudget" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="MonthlyMaintenanceBudget" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="MonthlyUtilitiesCost" class="form-label"></label>
+                    <input asp-for="MonthlyUtilitiesCost" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="MonthlyUtilitiesCost" class="text-danger small"></span>
+                </div>
+                <div class="mb-0">
+                    <label asp-for="HOAEstimate" class="form-label"></label>
+                    <input asp-for="HOAEstimate" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="HOAEstimate" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Closing costs</h5>
+                <div class="mb-3">
+                    <label asp-for="RealtorClosingFeePercentage" class="form-label"></label>
+                    <input asp-for="RealtorClosingFeePercentage" class="form-control" type="number" step="0.01" min="0" max="100" />
+                    <span asp-validation-for="RealtorClosingFeePercentage" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ClosingCostsPercentage" class="form-label"></label>
+                    <input asp-for="ClosingCostsPercentage" class="form-control" type="number" step="0.01" min="0" max="100" />
+                    <span asp-validation-for="ClosingCostsPercentage" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="LoanOriginationFeePct" class="form-label"></label>
+                    <input asp-for="LoanOriginationFeePct" class="form-control" type="number" step="0.01" min="0" max="100" />
+                    <span asp-validation-for="LoanOriginationFeePct" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="AppraisalFee" class="form-label"></label>
+                    <input asp-for="AppraisalFee" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="AppraisalFee" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="CreditReportFee" class="form-label"></label>
+                    <input asp-for="CreditReportFee" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="CreditReportFee" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="TitleInsuranceCost" class="form-label"></label>
+                    <input asp-for="TitleInsuranceCost" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="TitleInsuranceCost" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="TitleSearchFee" class="form-label"></label>
+                    <input asp-for="TitleSearchFee" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="TitleSearchFee" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="EscrowFee" class="form-label"></label>
+                    <input asp-for="EscrowFee" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="EscrowFee" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FloodInspectionFee" class="form-label"></label>
+                    <input asp-for="FloodInspectionFee" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="FloodInspectionFee" class="text-danger small"></span>
+                </div>
+                <div class="mb-0">
+                    <label asp-for="MiscellaneousFees" class="form-label"></label>
+                    <input asp-for="MiscellaneousFees" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="MiscellaneousFees" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
