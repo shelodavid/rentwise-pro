@@ -10,14 +10,11 @@
     ViewData["PageSubtitle"] as string,
     ViewData["PageMeta"] as string))
 
-@if (TempData["StatusMessage"] is string statusMessage)
-{
-    <div class="alert alert-warning" role="alert">
-        @statusMessage
-    </div>
+@{
+    var statusMessage = TempData["StatusMessage"] as string;
 }
 
-@if (TempData["StatusMessage"] is string statusMessage)
+@if (!string.IsNullOrWhiteSpace(statusMessage))
 {
     <div class="alert alert-warning" role="alert">
         @statusMessage

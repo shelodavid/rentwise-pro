@@ -13,10 +13,11 @@
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
         var currentSavedPropertyProfileId = ViewData["CurrentSavedPropertyProfileId"]?.ToString();
-        var purchaseSheetUrl = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId)
+        var hasSavedPropertyProfile = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId);
+        var purchaseSheetUrl = hasSavedPropertyProfile
             ? Url.Action("GeneratePurchaseSheet", "Home", new { savedPropertyProfileId = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
-        var forecastUrl = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId)
+        var forecastUrl = hasSavedPropertyProfile
             ? Url.Action("Forecast", "Forecast", new { savedPropertyProfileId = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
 
