@@ -106,19 +106,19 @@ else
                 @await Html.PartialAsync("_StatCard", (
                     "Loan Amount",
                     Model.Assumptions.LoanAmount.ToString("C0"),
-                    null))
+                    null), ViewData)
             </div>
             <div class="col-md-4">
                 @await Html.PartialAsync("_StatCard", (
                     "Monthly Mortgage",
                     Model.Assumptions.MonthlyMortgage.ToString("C0"),
-                    null))
+                    null), ViewData)
             </div>
             <div class="col-md-4">
                 @await Html.PartialAsync("_StatCard", (
                     "Cash Required",
                     Model.Assumptions.TotalCashInvested.ToString("C0"),
-                    null))
+                    null), ViewData)
             </div>
         </div>
 
