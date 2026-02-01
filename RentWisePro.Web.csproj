@@ -15,4 +15,12 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Etl/**" />
+    <Compile Remove="Etl.Core/**" />
+    <Compile Remove="Etl.Persistence/**" />
+    <Compile Remove="Etl.Sources/**" />
+    <Compile Remove="Etl.Tests/**" />
+  </ItemGroup>
+
 </Project>
