@@ -81,6 +81,14 @@ namespace RentWisePro.Web.Data
                 entity.HasIndex(e => new { e.InvestmentProfileId, e.RentalListingId })
                       .IsUnique();
 
+                entity.HasIndex(e => e.InvestmentProfileId);
+
+                entity.Property(e => e.DownpaymentPercentage)
+                      .HasColumnType("decimal(18,4)");
+
+                entity.Property(e => e.MortgageInterestRate)
+                      .HasColumnType("decimal(18,4)");
+
                 entity.Property(e => e.SavedAtUtc)
                       .HasDefaultValueSql("SYSUTCDATETIME()");
             });
