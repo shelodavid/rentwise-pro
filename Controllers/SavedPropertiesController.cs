@@ -40,10 +40,10 @@ namespace RentWisePro.Web.Controllers
                 return NotFound("Listing not found.");
             }
 
-            const int defaultInvestmentProfileId = 1;
-
             var investmentProfile = await _dbContext.InvestmentProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(profile => profile.Id == defaultInvestmentProfileId);
+                .OrderByDescending(profile => profile.IsDefault)
+                .ThenBy(profile => profile.Id)
+                .FirstOrDefaultAsync();
 
             if (investmentProfile is null)
             {

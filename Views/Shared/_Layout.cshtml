@@ -45,6 +45,9 @@
                 <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
                     Listings
                 </a>
+                <a class="nav-link @NavClass("InvestmentProfiles", "Index")" asp-controller="InvestmentProfiles" asp-action="Index">
+                    Investment Profile
+                </a>
                 @if (hasSavedPropertyProfile)
                 {
                     <a class="nav-link @NavClass("Home", "GeneratePurchaseSheet")" href="@purchaseSheetUrl">

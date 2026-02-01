@@ -27,11 +27,15 @@ namespace RentWisePro.Web.Data
                       .HasMaxLength(255)
                       .IsRequired();
 
+                entity.Property(e => e.IsDefault)
+                      .HasDefaultValue(false);
+
                 // Seed the “ID=1 default profile” you mentioned
                 entity.HasData(new InvestmentProfile
                 {
                     Id = 1,
                     InvestmentProfileName = "Default",
+                    IsDefault = true,
                     DownpaymentPercentage = 20m,
                     TermYears = 30,
                     MortgageInterestRate = 6.50m,
