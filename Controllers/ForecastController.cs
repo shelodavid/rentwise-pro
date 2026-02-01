@@ -18,16 +18,17 @@ namespace RentWisePro.Web.Controllers
         }
 
         [HttpGet("/Home/Forecast")]
-        [HttpGet("/Forecast/{savedPropertyProfileId:int?}")]
-        public async Task<IActionResult> Forecast(int? savedPropertyProfileId)
+        [HttpGet("/Forecast/{savedProfileId:int?}")]
+        public async Task<IActionResult> Forecast(int? savedProfileId, int? savedPropertyProfileId)
         {
-            if (!savedPropertyProfileId.HasValue || savedPropertyProfileId.Value <= 0)
+            var resolvedProfileId = savedProfileId ?? savedPropertyProfileId;
+            if (!resolvedProfileId.HasValue || resolvedProfileId.Value <= 0)
             {
                 return RedirectToListingsWithMessage();
             }
 
             var savedProfile = await _dbContext.SavedPropertyProfiles.AsNoTracking()
-                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == savedPropertyProfileId.Value);
+                .FirstOrDefaultAsync(profile => profile.SavedPropertyProfileId == resolvedProfileId.Value);
 
             if (savedProfile is null)
             {

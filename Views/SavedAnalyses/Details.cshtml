@@ -1,0 +1,83 @@
+@model RentWisePro.Web.Models.SavedAnalyses.SavedAnalysisDetailsVm
+
+@{
+    ViewData["Title"] = "Saved Analysis";
+    ViewData["PageSubtitle"] = Model.LocationLine;
+    ViewData["PageMeta"] = Model.InvestmentProfileName;
+}
+
+@await Html.PartialAsync("_PageHeader")
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-primary" asp-controller="Home" asp-action="GeneratePurchaseSheet" asp-route-savedProfileId="@Model.SavedPropertyProfileId">
+        View Purchase Sheet
+    </a>
+    <a class="btn btn-outline-primary" asp-controller="Forecast" asp-action="Forecast" asp-route-savedProfileId="@Model.SavedPropertyProfileId">
+        View ROI Forecast
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-1">@Model.AddressLine</h5>
+        <p class="text-muted mb-3">@Model.LocationLine</p>
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-3">
+                <div class="text-muted small">Purchase Price</div>
+                <div class="fw-semibold">@(Model.Price.HasValue ? Model.Price.Value.ToString("C0") : "—")</div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="text-muted small">Saved</div>
+                <div class="fw-semibold">@Model.SavedAtUtc.ToLocalTime().ToString("f")</div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="text-muted small">Investment Profile</div>
+                <div class="fw-semibold">@Model.InvestmentProfileName</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Snapshot assumptions</h5>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <tbody>
+                    <tr>
+                        <th scope="row">Down payment</th>
+                        <td>@Model.Assumptions.DownpaymentPercentage.ToString("0.##")%</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Interest rate</th>
+                        <td>@Model.Assumptions.MortgageInterestRate.ToString("0.##")%</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Loan term</th>
+                        <td>@Model.Assumptions.TermYears yrs</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Closing cost override</th>
+                        <td>@(Model.Assumptions.ClosingCostOverride.HasValue ? Model.Assumptions.ClosingCostOverride.Value.ToString("C0") : "—")</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Renovation budget</th>
+                        <td>@(Model.Assumptions.RenovationBudget.HasValue ? Model.Assumptions.RenovationBudget.Value.ToString("C0") : "—")</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Other upfront costs</th>
+                        <td>@(Model.Assumptions.OtherUpfrontCosts.HasValue ? Model.Assumptions.OtherUpfrontCosts.Value.ToString("C0") : "—")</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Monthly rent override</th>
+                        <td>@(Model.Assumptions.MonthlyRentOverride.HasValue ? Model.Assumptions.MonthlyRentOverride.Value.ToString("C0") : "—")</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Monthly other expenses override</th>
+                        <td>@(Model.Assumptions.MonthlyOtherExpensesOverride.HasValue ? Model.Assumptions.MonthlyOtherExpensesOverride.Value.ToString("C0") : "—")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
