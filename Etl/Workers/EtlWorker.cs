@@ -2,6 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RentWisePro.Etl.Core.Interfaces;
+using RentWisePro.Etl.Core.Models;
 using RentWisePro.Etl.Options;
 
 namespace RentWisePro.Etl.Workers;
@@ -32,6 +33,14 @@ public class EtlWorker : BackgroundService
             _logger.LogInformation("Queue-only mode enabled. Skipping orchestrator runs.");
             return;
         }
+
+        _logger.LogInformation(
+            "ETL ingestion configured (runOnce={RunOnce}, interval={Interval}, source={SourceFilter}, since={Since}, pageSize={PageSize})",
+            _options.RunOnce,
+            _options.Interval,
+            _options.SourceFilter ?? "all",
+            _options.Since?.ToString("O") ?? "unspecified",
+            _options.PageSize);
 
         if (_options.RunOnce)
         {

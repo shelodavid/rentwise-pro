@@ -9,6 +9,13 @@ public class EtlDbContextFactory : IDesignTimeDbContextFactory<Contexts.EtlDbCon
     public Contexts.EtlDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<Contexts.EtlDbContext>();
+        var envConnection = Environment.GetEnvironmentVariable("ConnectionStrings__RentWiseProDb");
+        if (!string.IsNullOrWhiteSpace(envConnection))
+        {
+            optionsBuilder.UseSqlServer(envConnection);
+            return new Contexts.EtlDbContext(optionsBuilder.Options);
+        }
+
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true)

@@ -97,6 +97,14 @@ static void ApplyExecutionOptions(EtlExecutionOptions options, string[] args)
         {
             options.QueueOnly = true;
         }
+        else if (string.Equals(arg, "--workQueue", StringComparison.OrdinalIgnoreCase))
+        {
+            options.QueueOnly = true;
+        }
+        else if (string.Equals(arg, "--work-queue", StringComparison.OrdinalIgnoreCase))
+        {
+            options.QueueOnly = true;
+        }
         else if (string.Equals(arg, "--queue-once", StringComparison.OrdinalIgnoreCase))
         {
             options.QueueOnly = true;
@@ -124,5 +132,38 @@ static void ApplyExecutionOptions(EtlExecutionOptions options, string[] args)
                 options.Since = since;
             }
         }
+        else if (arg.StartsWith("--pageSize=", StringComparison.OrdinalIgnoreCase))
+        {
+            if (int.TryParse(arg.Split('=', 2)[1], out var pageSize))
+            {
+                options.PageSize = pageSize;
+            }
+        }
+        else if (string.Equals(arg, "--pageSize", StringComparison.OrdinalIgnoreCase) && index + 1 < args.Length)
+        {
+            if (int.TryParse(args[index + 1], out var pageSize))
+            {
+                options.PageSize = pageSize;
+            }
+        }
+        else if (arg.StartsWith("--page-size=", StringComparison.OrdinalIgnoreCase))
+        {
+            if (int.TryParse(arg.Split('=', 2)[1], out var pageSize))
+            {
+                options.PageSize = pageSize;
+            }
+        }
+        else if (string.Equals(arg, "--page-size", StringComparison.OrdinalIgnoreCase) && index + 1 < args.Length)
+        {
+            if (int.TryParse(args[index + 1], out var pageSize))
+            {
+                options.PageSize = pageSize;
+            }
+        }
+    }
+
+    if (options.QueueOnly && options.RunOnce && !options.QueueRunOnce)
+    {
+        options.QueueRunOnce = true;
     }
 }

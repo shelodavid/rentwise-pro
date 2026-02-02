@@ -39,6 +39,12 @@ public class WorkQueueWorker : BackgroundService
             return;
         }
 
+        _logger.LogInformation(
+            "Work queue processing configured (runOnce={RunOnce}, queueOnly={QueueOnly}, queueRunOnce={QueueRunOnce})",
+            _options.RunOnce,
+            _options.QueueOnly,
+            _options.QueueRunOnce);
+
         if (_options.QueueRunOnce)
         {
             _logger.LogInformation("Queue drain mode enabled. Worker will exit after the queue is empty.");
