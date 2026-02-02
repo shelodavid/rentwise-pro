@@ -35,20 +35,27 @@ Set these in your hosting environment:
 ## Running the ETL (run once)
 
 ```bash
-dotnet run --project Etl/RentWisePro.Etl.csproj -- --runOnce
+dotnet run --project Etl/RentWisePro.Etl.csproj -- --run-once
 ```
 
 Optional filters:
 
 ```bash
-dotnet run --project Etl/RentWisePro.Etl.csproj -- --runOnce --source="US Real Estate Listings" --since="2024-01-01T00:00:00Z"
+dotnet run --project Etl/RentWisePro.Etl.csproj -- --run-once --source="US Real Estate Listings" --since="2024-01-01T00:00:00Z"
 ```
 
 ## Running the queue worker only
 The worker host includes both the orchestrator and work-queue processor. To run only the queue processor:
 
 ```bash
-dotnet run --project Etl/RentWisePro.Etl.csproj -- --queueOnly
+dotnet run --project Etl/RentWisePro.Etl.csproj -- --queue-only
+```
+
+## Draining the work queue once
+To drain the work queue and exit after it is empty:
+
+```bash
+dotnet run --project Etl/RentWisePro.Etl.csproj -- --queue-once
 ```
 
 ## Notes
@@ -56,6 +63,25 @@ dotnet run --project Etl/RentWisePro.Etl.csproj -- --queueOnly
 - Photos are stored on disk under `.local/photos/{propertyId}/{source}/{index}.jpg` by default.
 - Work queue processing uses SQL Server locking (`UPDLOCK`, `READPAST`) to claim jobs safely.
 - Default scheduling interval is 12 hours (configurable via `EtlExecution:Interval`).
+- The ETL worker reads `ConnectionStrings:RentWiseProDb` from config. Override it with the `ConnectionStrings__RentWiseProDb` environment variable.
+- `--run-once` exits after a single ingestion run; use `--queue-once` when you only want to drain the work queue.
+
+## First-run validation SQL (smoke checks)
+Run these against the RentWisePro database after the ETL completes to validate baseline activity:
+
+```sql
+SELECT TOP (5) RunId, StartedAt, CompletedAt, Status
+FROM etl_runs
+ORDER BY StartedAt DESC;
+
+SELECT TOP (5) WorkId, WorkType, Status, Attempts, AvailableAt
+FROM work_queue
+ORDER BY AvailableAt DESC;
+
+SELECT TOP (5) RawRef, Source, SourceListingId, FetchedAt
+FROM raw_payload_refs
+ORDER BY FetchedAt DESC;
+```
 
 ## Implementation Notes
 - **TargetFramework**: `net8.0`
