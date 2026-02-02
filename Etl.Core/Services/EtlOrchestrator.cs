@@ -66,7 +66,11 @@ public class EtlOrchestrator : IEtlOrchestrator
                 var sourceStartedAt = DateTimeOffset.UtcNow;
                 var page = 1;
                 const int maxPages = 500;
-                var pageSize = request.PageSize;
+                var pageSize = request.PageSize.GetValueOrDefault(50);
+                if (pageSize <= 0)
+                {
+                    pageSize = 50;
+                }
 
                 while (!cancellationToken.IsCancellationRequested && page <= maxPages)
                 {
@@ -177,5 +181,3 @@ public class EtlOrchestrator : IEtlOrchestrator
         }
     }
 }
-
-public record EtlRunRequest(string? SourceFilter, DateTimeOffset? Since, int PageSize);

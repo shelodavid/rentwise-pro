@@ -16,4 +16,16 @@ public class SnapshotDeciderTests
 
         Assert.False(shouldCreate);
     }
+
+    [Fact]
+    public void ShouldCreateSnapshot_WhenHashChanges_ReturnsTrue()
+    {
+        var decider = new SnapshotDecider();
+        var previous = "abc";
+        var current = "def";
+
+        var shouldCreate = decider.ShouldCreateSnapshot(previous, current);
+
+        Assert.True(shouldCreate);
+    }
 }

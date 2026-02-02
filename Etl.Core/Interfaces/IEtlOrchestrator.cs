@@ -1,4 +1,4 @@
-using RentWisePro.Etl.Core.Services;
+using RentWisePro.Etl.Core.Models;
 
 namespace RentWisePro.Etl.Core.Interfaces;
 
