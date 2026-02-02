@@ -1,11 +1,9 @@
 using Microsoft.EntityFrameworkCore.Migrations;
-using RentWisePro.Web.Data;
 
 #nullable disable
 
 namespace RentWisePro.Web.Migrations
 {
-    [DbContext(typeof(AuthDbContext))]
     public partial class AddIdentityTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
