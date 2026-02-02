@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RentWisePro.Web.Data;
+using Microsoft.EntityFrameworkCore.Migrations; // Add this using directive
+
 
 #nullable disable
 

@@ -1,8 +1,12 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 #nullable disable
 
 namespace RentWisePro.Etl.Persistence.Migrations;
+
+[DbContext(typeof(RentWisePro.Etl.Persistence.Contexts.EtlDbContext))]
+[Migration("20260415120000_InitialEtlSchema")]
 
 public partial class InitialEtlSchema : Migration
 {

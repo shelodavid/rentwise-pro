@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RentWisePro.Web.Data;
 
 #nullable disable
 
-namespace RentWisePro.Web.Migrations
+namespace RentWisePro.Web.Migrations.RentWiseProDb
 {
     [DbContext(typeof(RentWiseProDbContext))]
-    partial class RentWiseProDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260201135205_AddUserScopingToProfiles")]
+    partial class AddUserScopingToProfiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
