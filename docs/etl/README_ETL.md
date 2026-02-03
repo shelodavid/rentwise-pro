@@ -14,6 +14,24 @@ Set ETL API credentials (placeholder):
 dotnet user-secrets set "RapidApi:ApiKey" "..." --project Etl\\RentWisePro.Etl.csproj
 ```
 
+## Use fixtures (no paid API keys)
+
+Set one of the following in `appsettings.Development.json` (or environment variables):
+
+```json
+{
+  "Etl": {
+    "UseFixtures": true,
+    "FixtureRootPath": "Etl.Sources/Fixtures"
+  }
+}
+```
+
+The fixture dataset lives under `Etl.Sources/Fixtures/fixture-listings`. To simulate price or status changes,
+replace `search-results.json` with `search-results.updated.json` and run the ETL again to trigger snapshots.
+If you keep `RapidApi:Sources` configured, ensure the `Name` matches the fixture folder (for example, set it
+to `Fixture Listings` so it maps to `fixture-listings`).
+
 ## Run ingestion once
 
 ```powershell

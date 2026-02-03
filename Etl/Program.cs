@@ -55,14 +55,39 @@ builder.Services.AddScoped<IEtlRepository, EtlRepository>();
 
 builder.Services.AddHttpClient<RapidApiClient>();
 var rapidApiOptions = builder.Configuration.GetSection("RapidApi").Get<RapidApiOptions>() ?? new RapidApiOptions();
-foreach (var source in rapidApiOptions.Sources)
+var etlOptions = builder.Configuration.GetSection("Etl").Get<EtlOptions>() ?? new EtlOptions();
+var useFixtures = etlOptions.UseFixtures || string.IsNullOrWhiteSpace(rapidApiOptions.ApiKey);
+if (useFixtures)
 {
-    builder.Services.AddSingleton<IListingSource>(sp =>
-        new RapidApiListingSource(
-            sp.GetRequiredService<RapidApiClient>(),
-            source,
-            rapidApiOptions.ApiKey,
-            sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RapidApiListingSource>>()));
+    var fixtureRootPath = string.IsNullOrWhiteSpace(etlOptions.FixtureRootPath)
+        ? Path.Combine(Directory.GetCurrentDirectory(), "Etl.Sources", "Fixtures")
+        : etlOptions.FixtureRootPath;
+    var fixtureSources = rapidApiOptions.Sources.Count > 0
+        ? rapidApiOptions.Sources.Select(source => source.Name)
+        : new[] { "Fixture Listings" };
+
+    foreach (var sourceName in fixtureSources)
+    {
+        builder.Services.AddSingleton<IListingSource>(sp =>
+            new DevFixtureListingSource(
+                sourceName,
+                fixtureRootPath,
+                sp.GetRequiredService<AddressNormalizer>(),
+                sp.GetRequiredService<HashingService>(),
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DevFixtureListingSource>>()));
+    }
+}
+else
+{
+    foreach (var source in rapidApiOptions.Sources)
+    {
+        builder.Services.AddSingleton<IListingSource>(sp =>
+            new RapidApiListingSource(
+                sp.GetRequiredService<RapidApiClient>(),
+                source,
+                rapidApiOptions.ApiKey,
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RapidApiListingSource>>()));
+    }
 }
 
 builder.Services.AddSingleton<IRawPayloadStore, LocalRawPayloadStore>();
