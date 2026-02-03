@@ -28,6 +28,7 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.Configure<EtlOptions>(builder.Configuration.GetSection("Etl"));
 builder.Services.Configure<RapidApiOptions>(builder.Configuration.GetSection("RapidApi"));
+builder.Services.Configure<RentometerOptions>(builder.Configuration.GetSection("Rentometer"));
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 builder.Services.Configure<EtlExecutionOptions>(options =>
 {
@@ -93,6 +94,7 @@ builder.Services.AddSingleton<IRawPayloadStore, LocalRawPayloadStore>();
 builder.Services.AddSingleton<IPhotoStorage, LocalPhotoStorage>();
 
 builder.Services.AddHttpClient<PhotoDownloadService>();
+builder.Services.AddScoped<RentForecastService>();
 
 builder.Services.AddScoped<IEtlOrchestrator, EtlOrchestrator>();
 builder.Services.AddHostedService<EtlWorker>();

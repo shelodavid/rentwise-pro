@@ -14,6 +14,7 @@ public class EtlDbContext : DbContext
     public DbSet<ListingSnapshot> ListingSnapshots => Set<ListingSnapshot>();
     public DbSet<RawPayloadRef> RawPayloadRefs => Set<RawPayloadRef>();
     public DbSet<PropertyPhoto> PropertyPhotos => Set<PropertyPhoto>();
+    public DbSet<RentForecast> RentForecasts => Set<RentForecast>();
     public DbSet<WorkQueueItem> WorkQueue => Set<WorkQueueItem>();
     public DbSet<EtlRun> EtlRuns => Set<EtlRun>();
     public DbSet<EtlRunSourceStat> EtlRunSourceStats => Set<EtlRunSourceStat>();
@@ -77,6 +78,15 @@ public class EtlDbContext : DbContext
             entity.Property(e => e.StoragePath).HasMaxLength(500);
             entity.Property(e => e.Checksum).HasMaxLength(128);
             entity.HasIndex(e => new { e.PropertyId, e.Source, e.PhotoIndex }).IsUnique();
+        });
+
+        modelBuilder.Entity<RentForecast>(entity =>
+        {
+            entity.ToTable("rent_forecasts");
+            entity.HasKey(e => e.ForecastId);
+            entity.Property(e => e.Source).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.EstimatedRent).HasColumnType("decimal(18,2)");
+            entity.HasIndex(e => new { e.PropertyId, e.Source });
         });
 
         modelBuilder.Entity<WorkQueueItem>(entity =>
