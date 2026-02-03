@@ -18,6 +18,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddJsonFile("appsettings.Development.json", optional: true)
     .AddEnvironmentVariables();
 
