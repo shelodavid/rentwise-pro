@@ -113,6 +113,21 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.HasIndex("PropertyId", "Source", "PhotoIndex").IsUnique();
         });
 
+        modelBuilder.Entity("RentWisePro.Etl.Core.Entities.RentForecast", entity =>
+        {
+            entity.ToTable("rent_forecasts");
+            entity.HasKey("ForecastId");
+            entity.Property<Guid>("ForecastId");
+            entity.Property<Guid>("PropertyId");
+            entity.Property<Guid?>("ListingId");
+            entity.Property<string>("Source").HasMaxLength(100);
+            entity.Property<decimal>("EstimatedRent").HasColumnType("decimal(18,2)");
+            entity.Property<bool>("IsStub");
+            entity.Property<DateTimeOffset>("CreatedAt");
+            entity.Property<DateTimeOffset>("UpdatedAt");
+            entity.HasIndex("PropertyId", "Source");
+        });
+
         modelBuilder.Entity("RentWisePro.Etl.Core.Entities.WorkQueueItem", entity =>
         {
             entity.ToTable("work_queue");
