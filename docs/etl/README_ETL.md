@@ -50,6 +50,13 @@ dotnet run --project Etl\\RentWisePro.Etl.csproj -- --workQueue --runOnce
 dotnet run --project Etl\\RentWisePro.Etl.csproj -- --workQueue
 ```
 
+## Apply ETL migrations locally
+
+```powershell
+dotnet ef migrations add FixDecimalPrecision --project Etl.Persistence\\RentWisePro.Etl.Persistence.csproj --startup-project Etl\\RentWisePro.Etl.csproj --context RentWisePro.Etl.Persistence.Contexts.EtlDbContext
+dotnet ef database update --project Etl.Persistence\\RentWisePro.Etl.Persistence.csproj --startup-project Etl\\RentWisePro.Etl.csproj --context RentWisePro.Etl.Persistence.Contexts.EtlDbContext
+```
+
 ## Notes
 
 - `--source` filters to a specific listing source (case-insensitive).

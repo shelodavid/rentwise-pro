@@ -35,13 +35,13 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.Property<string>("City").HasMaxLength(100);
             entity.Property<string>("State").HasMaxLength(50);
             entity.Property<string>("Zip").HasMaxLength(20);
-            entity.Property<decimal?>("Latitude");
-            entity.Property<decimal?>("Longitude");
+            entity.Property<decimal?>("Latitude").HasPrecision(9, 6);
+            entity.Property<decimal?>("Longitude").HasPrecision(9, 6);
             entity.Property<string>("PropertyType").HasMaxLength(100);
             entity.Property<int?>("YearBuilt");
             entity.Property<int?>("SquareFeet");
-            entity.Property<decimal?>("Beds");
-            entity.Property<decimal?>("Baths");
+            entity.Property<decimal?>("Beds").HasPrecision(4, 1);
+            entity.Property<decimal?>("Baths").HasPrecision(4, 1);
             entity.Property<int>("NormalizationVersion");
             entity.Property<DateTimeOffset>("CreatedAt");
             entity.Property<DateTimeOffset>("UpdatedAt");
@@ -81,7 +81,7 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.Property<string>("Source").HasMaxLength(100);
             entity.Property<string>("SourceListingId").HasMaxLength(200);
             entity.Property<string>("Status").HasMaxLength(50);
-            entity.Property<decimal?>("Price");
+            entity.Property<decimal?>("Price").HasColumnType("decimal(18,0)");
             entity.Property<string>("Currency").HasMaxLength(10).HasDefaultValue("USD");
             entity.Property<DateTimeOffset>("FirstSeenAt");
             entity.Property<DateTimeOffset>("LastSeenAt");
@@ -152,7 +152,7 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.Property<Guid>("SnapshotId");
             entity.Property<Guid>("ListingId");
             entity.Property<string>("Status").HasMaxLength(50);
-            entity.Property<decimal?>("Price");
+            entity.Property<decimal?>("Price").HasColumnType("decimal(18,0)");
             entity.Property<string>("MaterialHash").HasMaxLength(128);
             entity.Property<DateTimeOffset>("ScrapedAt");
             entity.Property<string>("RawRef");

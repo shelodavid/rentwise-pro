@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Etl.Core\RentWisePro.Etl.Core.csproj" />
+    <ProjectReference Include="..\Etl.Persistence\RentWisePro.Etl.Persistence.csproj" />
     <ProjectReference Include="..\Etl.Sources\RentWisePro.Etl.Sources.csproj" />
   </ItemGroup>
 </Project>
