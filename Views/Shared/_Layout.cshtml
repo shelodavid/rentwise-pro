@@ -33,8 +33,11 @@
         <aside class="app-sidebar" aria-label="Primary">
             <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">RentWise Pro</a>
             <nav class="app-nav nav flex-column" role="navigation">
-                <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
+                <a class="nav-link @NavClass("Listings", "Index")" asp-controller="Listings" asp-action="Index">
                     Listings
+                </a>
+                <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
+                    Rental Listings
                 </a>
                 <a class="nav-link @NavClass("InvestmentProfiles", "Index")" asp-controller="InvestmentProfiles" asp-action="Index">
                     Investment Profile
