@@ -225,7 +225,7 @@ public class EtlOpsMetricsService
         var failed = await windowQuery.CountAsync(run => run.Status == FailedStatus, cancellationToken);
         var averageDuration = await windowQuery
             .Where(run => run.FinishedAt.HasValue)
-            .AverageAsync(run => (double?)EF.Functions.DateDiffMillisecond(run.StartedAt, run.FinishedAt.Value), cancellationToken);
+            .AverageAsync(run => (double?)EF.Functions.DateDiffMillisecond(run.StartedAt, run.FinishedAt ?? run.StartedAt), cancellationToken);
 
         return new EtlRunWindowVm
         {

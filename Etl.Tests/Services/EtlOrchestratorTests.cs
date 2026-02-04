@@ -32,7 +32,7 @@ public class EtlOrchestratorTests
 
         await orchestrator.RunAsync(new EtlRunRequest(null, null, 50), CancellationToken.None);
 
-        var photoWork = Assert.Single(repository.WorkItems.Where(item => item.WorkType == "photo_download"));
+        var photoWork = Assert.Single(repository.WorkItems, item => item.WorkType == "photo_download");
         using var document = JsonDocument.Parse(photoWork.PayloadJson);
         var photos = document.RootElement.GetProperty("photos");
         Assert.Equal(10, photos.GetArrayLength());
