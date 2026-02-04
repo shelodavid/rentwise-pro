@@ -12,6 +12,7 @@
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
         var currentSavedPropertyProfileId = ViewData["CurrentSavedPropertyProfileId"]?.ToString();
         var hasSavedPropertyProfile = !string.IsNullOrWhiteSpace(currentSavedPropertyProfileId);
         var purchaseSheetUrl = hasSavedPropertyProfile
@@ -21,10 +22,11 @@
             ? Url.Action("Forecast", "SavedAnalyses", new { id = currentSavedPropertyProfileId })
             : Url.Action("Index", "Home");
 
-        string NavClass(string controller, string action)
+        string NavClass(string controller, string action, string? area = null)
         {
             return string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
                    && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(currentArea, area, StringComparison.OrdinalIgnoreCase)
                 ? "active"
                 : string.Empty;
         }
@@ -33,9 +35,6 @@
         <aside class="app-sidebar" aria-label="Primary">
             <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">RentWise Pro</a>
             <nav class="app-nav nav flex-column" role="navigation">
-                <a class="nav-link @NavClass("Listings", "Index")" asp-controller="Listings" asp-action="Index">
-                    Listings
-                </a>
                 <a class="nav-link @NavClass("RentalListings", "Index")" asp-controller="RentalListings" asp-action="Index">
                     Rental Listings
                 </a>
@@ -57,6 +56,13 @@
                 <a class="nav-link @NavClass("Home", "Privacy")" asp-controller="Home" asp-action="Privacy">
                     Privacy
                 </a>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <div class="nav-link text-uppercase text-muted small mt-3">Admin</div>
+                    <a class="nav-link @NavClass("EtlOps", "Index", "Admin")" asp-area="Admin" asp-controller="EtlOps" asp-action="Index">
+                        ETL Ops
+                    </a>
+                }
             </nav>
         </aside>
 
