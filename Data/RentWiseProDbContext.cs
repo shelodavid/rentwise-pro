@@ -20,6 +20,8 @@ namespace RentWisePro.Web.Data
         public DbSet<EtlProperty> EtlProperties => Set<EtlProperty>();
         public DbSet<EtlPropertyPhoto> EtlPropertyPhotos => Set<EtlPropertyPhoto>();
         public DbSet<EtlRun> EtlRuns => Set<EtlRun>();
+        public DbSet<EtlRunSourceStat> EtlRunSourceStats => Set<EtlRunSourceStat>();
+        public DbSet<WorkQueueItem> EtlWorkQueueItems => Set<WorkQueueItem>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -164,6 +166,22 @@ namespace RentWisePro.Web.Data
             {
                 entity.ToTable("etl_runs");
                 entity.HasKey(e => e.RunId);
+                entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Notes);
+            });
+
+            modelBuilder.Entity<EtlRunSourceStat>(entity =>
+            {
+                entity.ToTable("etl_run_source_stats");
+                entity.HasKey(e => new { e.RunId, e.Source });
+                entity.Property(e => e.Source).HasMaxLength(100).IsRequired();
+            });
+
+            modelBuilder.Entity<WorkQueueItem>(entity =>
+            {
+                entity.ToTable("work_queue");
+                entity.HasKey(e => e.WorkId);
+                entity.Property(e => e.WorkType).HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
             });
 
