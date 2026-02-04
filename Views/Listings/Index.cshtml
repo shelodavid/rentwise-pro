@@ -1,0 +1,161 @@
+@model RentWisePro.Web.Models.EtlListingsIndexVm
+
+@{
+    ViewData["Title"] = "Listings";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">Listings</h1>
+        <p class="text-muted mb-0">Browse the latest ETL-ingested listings and photos.</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">ETL Health</h5>
+        <div class="row gy-3">
+            <div class="col-lg-4">
+                <div class="text-muted">Last Run Status</div>
+                @if (Model.Health.LatestRun is null)
+                {
+                    <div class="fw-semibold">No runs recorded</div>
+                }
+                else
+                {
+                    <div class="fw-semibold">@Model.Health.LatestRun.Status</div>
+                    <div class="text-muted small">Started @Model.Health.LatestRun.StartedAt.ToString("g")</div>
+                    @if (Model.Health.LatestRun.FinishedAt.HasValue)
+                    {
+                        <div class="text-muted small">Finished @Model.Health.LatestRun.FinishedAt.Value.ToString("g")</div>
+                    }
+                }
+            </div>
+            <div class="col-lg-8">
+                <div class="text-muted">Listings by Status</div>
+                <div class="d-flex flex-wrap gap-3 mt-2">
+                    @foreach (var option in Model.StatusOptions)
+                    {
+                        Model.Health.ListingCountsByStatus.TryGetValue(option, out var count);
+                        <div class="border rounded px-3 py-2 bg-light">
+                            <div class="small text-uppercase text-muted">@option</div>
+                            <div class="fw-semibold">@count</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="">All</option>
+                    @foreach (var status in Model.Statuses)
+                    {
+                        <option value="@status.Value" selected="@(status.Selected)">@status.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Source</label>
+                <select class="form-select" name="source">
+                    <option value="">All</option>
+                    @foreach (var source in Model.Sources)
+                    {
+                        <option value="@source.Value" selected="@(source.Selected)">@source.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">City</label>
+                <input type="text" class="form-control" name="city" value="@Model.City" placeholder="City" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">State</label>
+                <input type="text" class="form-control" name="state" value="@Model.State" placeholder="State" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Sort by</label>
+                <select class="form-select" name="sortBy">
+                    <option value="last_seen_at" selected="@(string.IsNullOrWhiteSpace(Model.SortBy) || Model.SortBy == "last_seen_at")">Last seen</option>
+                    <option value="price" selected="@(Model.SortBy == "price")">Price</option>
+                </select>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button class="btn btn-primary" type="submit">Apply filters</button>
+                <a class="btn btn-outline-secondary" asp-controller="Listings" asp-action="Index">Clear filters</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Listings.Count == 0)
+{
+    <div class="alert alert-info">No listings found. Adjust filters or check the ETL pipeline.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Address</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Beds/Baths/Sqft</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Last Seen</th>
+                    <th scope="col">Photos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var listing in Model.Listings)
+                {
+                    var address = string.Join(", ", new[]
+                    {
+                        listing.Street,
+                        listing.City,
+                        listing.State,
+                        listing.Zip
+                    }.Where(value => !string.IsNullOrWhiteSpace(value)));
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(address) ? "Unknown address" : address)</div>
+                        </td>
+                        <td>@(listing.Price.HasValue ? listing.Price.Value.ToString("C0") : "—")</td>
+                        <td>@listing.Status</td>
+                        <td>
+                            @(listing.Beds?.ToString("0.#") ?? "—") beds / @(listing.Baths?.ToString("0.#") ?? "—") baths /
+                            @(listing.SquareFeet?.ToString("N0") ?? "—") sqft
+                        </td>
+                        <td>
+                            <div>@listing.Source</div>
+                            <div class="text-muted small">@listing.SourceListingId</div>
+                        </td>
+                        <td>@listing.LastSeenAt.ToString("g")</td>
+                        <td>
+                            @if (listing.PhotoUrls.Count == 0)
+                            {
+                                <span class="text-muted">No photos</span>
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var photo in listing.PhotoUrls)
+                                    {
+                                        <img src="@photo" alt="Listing photo" style="width: 60px; height: 60px; object-fit: cover;" />
+                                    }
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

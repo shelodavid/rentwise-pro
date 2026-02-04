@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Domain.Entities;
+using RentWisePro.Web.Domain.Entities.Etl;
 using RentWisePro.Web.Domain.Identity;
 
 namespace RentWisePro.Web.Data
@@ -15,6 +16,10 @@ namespace RentWisePro.Web.Data
         public DbSet<InvestmentProfile> InvestmentProfiles => Set<InvestmentProfile>();
         public DbSet<RentalListing> RentalListings => Set<RentalListing>();
         public DbSet<SavedPropertyProfile> SavedPropertyProfiles => Set<SavedPropertyProfile>();
+        public DbSet<EtlListing> EtlListings => Set<EtlListing>();
+        public DbSet<EtlProperty> EtlProperties => Set<EtlProperty>();
+        public DbSet<EtlPropertyPhoto> EtlPropertyPhotos => Set<EtlPropertyPhoto>();
+        public DbSet<EtlRun> EtlRuns => Set<EtlRun>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -117,6 +122,62 @@ namespace RentWisePro.Web.Data
 
                 entity.HasIndex(e => new { e.UserId, e.SavedAtUtc });
             });
+
+            // ---- ETL: Properties ----
+            modelBuilder.Entity<EtlProperty>(entity =>
+            {
+                entity.ToTable("properties");
+                entity.HasKey(e => e.PropertyId);
+                entity.Property(e => e.Street).HasMaxLength(255);
+                entity.Property(e => e.City).HasMaxLength(100);
+                entity.Property(e => e.State).HasMaxLength(50);
+                entity.Property(e => e.Zip).HasMaxLength(20);
+            });
+
+            // ---- ETL: Listings ----
+            modelBuilder.Entity<EtlListing>(entity =>
+            {
+                entity.ToTable("listings");
+                entity.HasKey(e => e.ListingId);
+                entity.Property(e => e.Source).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.SourceListingId).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                entity.HasIndex(e => new { e.Source, e.SourceListingId }).IsUnique();
+                entity.HasIndex(e => e.PropertyId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.LastSeenAt);
+            });
+
+            // ---- ETL: Property Photos ----
+            modelBuilder.Entity<EtlPropertyPhoto>(entity =>
+            {
+                entity.ToTable("property_photos");
+                entity.HasKey(e => e.PhotoId);
+                entity.Property(e => e.Source).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.UrlOriginal).HasMaxLength(1000);
+                entity.Property(e => e.StoragePath).HasMaxLength(500);
+                entity.HasIndex(e => new { e.PropertyId, e.Source, e.PhotoIndex }).IsUnique();
+            });
+
+            // ---- ETL: Runs ----
+            modelBuilder.Entity<EtlRun>(entity =>
+            {
+                entity.ToTable("etl_runs");
+                entity.HasKey(e => e.RunId);
+                entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+            });
+
+            modelBuilder.Entity<EtlListing>()
+                .HasOne(e => e.Property)
+                .WithMany(p => p.Listings)
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EtlPropertyPhoto>()
+                .HasOne(e => e.Property)
+                .WithMany(p => p.Photos)
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
