@@ -1,4 +1,7 @@
 param(
+    [string]$Environment = 'Development',
+    [string]$ConnectionString,
+    [string]$ProjectPath = 'Etl/RentWisePro.Etl.csproj',
     [string]$SourceFilter,
     [string]$Since,
     [int]$PageSize
@@ -6,11 +9,22 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-if ([string]::IsNullOrWhiteSpace($env:ConnectionStrings__RentWiseProDb)) {
-    $env:ConnectionStrings__RentWiseProDb = 'Server=(localdb)\\MSSQLLocalDB;Database=RentWisePro;Trusted_Connection=True;TrustServerCertificate=True;'
+if (-not [string]::IsNullOrWhiteSpace($ConnectionString)) {
+    $env:ConnectionStrings__RentWiseProDb = $ConnectionString
 }
 
-$projectPath = Resolve-Path (Join-Path $PSScriptRoot '..\..\Etl\RentWisePro.Etl.csproj')
+if ([string]::IsNullOrWhiteSpace($env:ConnectionStrings__RentWiseProDb)) {
+    Write-Error 'Missing connection string. Provide -ConnectionString or set ConnectionStrings__RentWiseProDb.'
+    exit 1
+}
+
+$env:ASPNETCORE_ENVIRONMENT = $Environment
+
+if ([System.IO.Path]::IsPathRooted($ProjectPath)) {
+    $resolvedProjectPath = Resolve-Path $ProjectPath
+} else {
+    $resolvedProjectPath = Resolve-Path (Join-Path $PSScriptRoot ('..\..\' + $ProjectPath))
+}
 
 $etlArgs = @('--runOnce')
 
@@ -26,9 +40,18 @@ if ($PageSize -gt 0) {
     $etlArgs += @('--page-size', $PageSize)
 }
 
-$dotnetArgs = @('run', '--project', $projectPath, '--') + $etlArgs
+$dotnetArgs = @('run', '--project', $resolvedProjectPath, '--') + $etlArgs
 
 & dotnet @dotnetArgs
+
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
+$queueArgs = @('--queue-only', '--queue-once')
+$queueDotnetArgs = @('run', '--project', $resolvedProjectPath, '--') + $queueArgs
+
+& dotnet @queueDotnetArgs
 
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE

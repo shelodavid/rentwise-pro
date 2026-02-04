@@ -1,6 +1,9 @@
 param(
     [string]$RunAsUser,
-    [string]$RunAsPassword
+    [string]$RunAsPassword,
+    [string]$Environment = 'Development',
+    [string]$ConnectionString,
+    [string]$ProjectPath = 'Etl/RentWisePro.Etl.csproj'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,8 +18,32 @@ $logonType = if ([string]::IsNullOrWhiteSpace($RunAsPassword)) { 'InteractiveTok
 $runEtlScript = Resolve-Path (Join-Path $PSScriptRoot 'run-etl-once.ps1')
 $runQueueScript = Resolve-Path (Join-Path $PSScriptRoot 'run-queue-once.ps1')
 
-$etlArguments = [System.Security.SecurityElement]::Escape("-NoProfile -ExecutionPolicy Bypass -File `"$runEtlScript`"")
-$queueCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$runQueueScript`""
+$etlArguments = @(
+    '-NoProfile',
+    '-ExecutionPolicy', 'Bypass',
+    '-File', "`"$runEtlScript`"",
+    '-Environment', "`"$Environment`"",
+    '-ProjectPath', "`"$ProjectPath`""
+)
+
+if (-not [string]::IsNullOrWhiteSpace($ConnectionString)) {
+    $etlArguments += @('-ConnectionString', "`"$ConnectionString`"")
+}
+
+$queueArguments = @(
+    '-NoProfile',
+    '-ExecutionPolicy', 'Bypass',
+    '-File', "`"$runQueueScript`"",
+    '-Environment', "`"$Environment`"",
+    '-ProjectPath', "`"$ProjectPath`""
+)
+
+if (-not [string]::IsNullOrWhiteSpace($ConnectionString)) {
+    $queueArguments += @('-ConnectionString', "`"$ConnectionString`"")
+}
+
+$etlArgumentString = [System.Security.SecurityElement]::Escape(($etlArguments -join ' '))
+$queueCommand = "powershell.exe " + ($queueArguments -join ' ')
 
 $today = Get-Date -Format 'yyyy-MM-dd'
 $registeredAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:ss')
@@ -48,7 +75,7 @@ $etlXml = @"
       </ScheduleByDay>
     </CalendarTrigger>
     <CalendarTrigger>
-      <StartBoundary>${today}T23:00:00</StartBoundary>
+      <StartBoundary>${today}T00:00:00</StartBoundary>
       <ScheduleByDay>
         <DaysInterval>1</DaysInterval>
       </ScheduleByDay>
@@ -83,7 +110,7 @@ $etlXml = @"
   <Actions Context="Author">
     <Exec>
       <Command>powershell.exe</Command>
-      <Arguments>$etlArguments</Arguments>
+      <Arguments>$etlArgumentString</Arguments>
     </Exec>
   </Actions>
 </Task>
