@@ -20,6 +20,7 @@ namespace RentWisePro.Web.Data
         public DbSet<EtlProperty> EtlProperties => Set<EtlProperty>();
         public DbSet<EtlPropertyPhoto> EtlPropertyPhotos => Set<EtlPropertyPhoto>();
         public DbSet<EtlRun> EtlRuns => Set<EtlRun>();
+        public DbSet<EtlAdminAction> EtlAdminActions => Set<EtlAdminAction>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -165,6 +166,16 @@ namespace RentWisePro.Web.Data
                 entity.ToTable("etl_runs");
                 entity.HasKey(e => e.RunId);
                 entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+            });
+
+            // ---- ETL: Admin Actions ----
+            modelBuilder.Entity<EtlAdminAction>(entity =>
+            {
+                entity.ToTable("etl_admin_actions");
+                entity.HasKey(e => e.ActionId);
+                entity.Property(e => e.ActionType).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.RequestedByUserId).HasMaxLength(450);
             });
 
             modelBuilder.Entity<EtlListing>()
