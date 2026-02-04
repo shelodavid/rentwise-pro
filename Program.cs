@@ -37,6 +37,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<ForecastCalculationService>();
 builder.Services.AddScoped<ClosingDisclosureCalculationService>();
 builder.Services.AddScoped<InvestmentProfileResolver>();
+builder.Services.AddScoped<EtlOpsMetricsService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

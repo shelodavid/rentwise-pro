@@ -1,0 +1,212 @@
+@model RentWisePro.Web.Models.Admin.EtlOpsIndexVm
+
+@{
+    ViewData["Title"] = "ETL Ops";
+}
+
+@functions {
+    private static string FormatDuration(double? milliseconds)
+    {
+        if (!milliseconds.HasValue)
+        {
+            return "—";
+        }
+
+        var span = TimeSpan.FromMilliseconds(milliseconds.Value);
+        return span.TotalHours >= 1
+            ? $"{(int)span.TotalHours}h {span.Minutes}m {span.Seconds}s"
+            : span.TotalMinutes >= 1
+                ? $"{span.Minutes}m {span.Seconds}s"
+                : $"{span.Seconds}s";
+    }
+
+    private static string FormatDuration(long? milliseconds)
+    {
+        if (!milliseconds.HasValue)
+        {
+            return "—";
+        }
+
+        return FormatDuration((double?)milliseconds.Value);
+    }
+
+    private static string FormatAge(TimeSpan? age)
+    {
+        if (!age.HasValue)
+        {
+            return "—";
+        }
+
+        var span = age.Value;
+        return span.TotalHours >= 1
+            ? $"{(int)span.TotalHours}h {span.Minutes}m"
+            : span.TotalMinutes >= 1
+                ? $"{span.Minutes}m {span.Seconds}s"
+                : $"{span.Seconds}s";
+    }
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">ETL Ops</h1>
+
+    <section class="mb-4">
+        <h2 class="h4">ETL Metrics</h2>
+        @if (!Model.HasRuns)
+        {
+            <div class="alert alert-info">No runs yet. Metrics will appear after the first ETL run completes.</div>
+        }
+        else
+        {
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h6 text-uppercase text-muted">Last 24 hours</h3>
+                            <dl class="row mb-0">
+                                <dt class="col-6">Total runs</dt>
+                                <dd class="col-6">@Model.Last24Hours.TotalRuns</dd>
+                                <dt class="col-6">Completed</dt>
+                                <dd class="col-6">@Model.Last24Hours.CompletedRuns</dd>
+                                <dt class="col-6">Failed</dt>
+                                <dd class="col-6">@Model.Last24Hours.FailedRuns</dd>
+                                <dt class="col-6">Avg duration</dt>
+                                <dd class="col-6">@FormatDuration(Model.Last24Hours.AverageDurationMs)</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h6 text-uppercase text-muted">Last 7 days</h3>
+                            <dl class="row mb-0">
+                                <dt class="col-6">Total runs</dt>
+                                <dd class="col-6">@Model.Last7Days.TotalRuns</dd>
+                                <dt class="col-6">Completed</dt>
+                                <dd class="col-6">@Model.Last7Days.CompletedRuns</dd>
+                                <dt class="col-6">Failed</dt>
+                                <dd class="col-6">@Model.Last7Days.FailedRuns</dd>
+                                <dt class="col-6">Avg duration</dt>
+                                <dd class="col-6">@FormatDuration(Model.Last7Days.AverageDurationMs)</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h6 text-uppercase text-muted">Work queue health</h3>
+                            <dl class="row mb-0">
+                                <dt class="col-6">Queued</dt>
+                                <dd class="col-6">@Model.WorkQueue.QueuedCount</dd>
+                                <dt class="col-6">Processing</dt>
+                                <dd class="col-6">@Model.WorkQueue.ProcessingCount</dd>
+                                <dt class="col-6">Failed</dt>
+                                <dd class="col-6">@Model.WorkQueue.FailedCount</dd>
+                                <dt class="col-6">Oldest queued age</dt>
+                                <dd class="col-6">@FormatAge(Model.WorkQueue.OldestQueuedAge)</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h4">Per-source stats</h2>
+        @if (Model.SourceSummaries.Count == 0)
+        {
+            <div class="alert alert-secondary">No source stats yet.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                            <th colspan="6">Last run</th>
+                            <th colspan="6">Last 24h</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>Fetched</th>
+                            <th>Upserted</th>
+                            <th>Snapshots</th>
+                            <th>Missing</th>
+                            <th>Errors</th>
+                            <th>Duration</th>
+                            <th>Fetched</th>
+                            <th>Upserted</th>
+                            <th>Snapshots</th>
+                            <th>Missing</th>
+                            <th>Errors</th>
+                            <th>Avg duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var summary in Model.SourceSummaries)
+                        {
+                            <tr>
+                                <td>@summary.Source</td>
+                                <td>@summary.LastRun?.FetchedCount</td>
+                                <td>@summary.LastRun?.UpsertedCount</td>
+                                <td>@summary.LastRun?.SnapshotCount</td>
+                                <td>@summary.LastRun?.MissingCount</td>
+                                <td>@summary.LastRun?.Errors</td>
+                                <td>@FormatDuration(summary.LastRun?.DurationMs)</td>
+                                <td>@summary.Last24Hours.FetchedCount</td>
+                                <td>@summary.Last24Hours.UpsertedCount</td>
+                                <td>@summary.Last24Hours.SnapshotCount</td>
+                                <td>@summary.Last24Hours.MissingCount</td>
+                                <td>@summary.Last24Hours.Errors</td>
+                                <td>@FormatDuration(summary.Last24Hours.AverageDurationMs)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h4">Recent runs</h2>
+        @if (!Model.HasRuns)
+        {
+            <div class="alert alert-secondary">No runs yet.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Started</th>
+                            <th>Finished</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var run in Model.RecentRuns)
+                        {
+                            <tr>
+                                <td>@run.StartedAt.ToString("g")</td>
+                                <td>@(run.FinishedAt?.ToString("g") ?? "—")</td>
+                                <td>@FormatDuration(run.DurationMs)</td>
+                                <td>@run.Status</td>
+                                <td>@(string.IsNullOrWhiteSpace(run.Notes) ? "—" : run.Notes)</td>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="EtlOps" asp-action="RunDetails" asp-route-runId="@run.RunId">View details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
