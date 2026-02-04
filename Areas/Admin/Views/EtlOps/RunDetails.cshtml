@@ -1,0 +1,89 @@
+@model RentWisePro.Web.Models.Admin.EtlRunDetailsVm
+
+@{
+    ViewData["Title"] = "ETL Run Details";
+}
+
+@functions {
+    private static string FormatDuration(long? milliseconds)
+    {
+        if (!milliseconds.HasValue)
+        {
+            return "—";
+        }
+
+        var span = TimeSpan.FromMilliseconds(milliseconds.Value);
+        return span.TotalHours >= 1
+            ? $"{(int)span.TotalHours}h {span.Minutes}m {span.Seconds}s"
+            : span.TotalMinutes >= 1
+                ? $"{span.Minutes}m {span.Seconds}s"
+                : $"{span.Seconds}s";
+    }
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">ETL Run Details</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Run ID</dt>
+                <dd class="col-sm-9">@Model.Run.RunId</dd>
+                <dt class="col-sm-3">Started</dt>
+                <dd class="col-sm-9">@Model.Run.StartedAt.ToString("g")</dd>
+                <dt class="col-sm-3">Finished</dt>
+                <dd class="col-sm-9">@(Model.Run.FinishedAt?.ToString("g") ?? "—")</dd>
+                <dt class="col-sm-3">Duration</dt>
+                <dd class="col-sm-9">@FormatDuration(Model.Run.DurationMs)</dd>
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">@Model.Run.Status</dd>
+                <dt class="col-sm-3">Notes</dt>
+                <dd class="col-sm-9">@(string.IsNullOrWhiteSpace(Model.Run.Notes) ? "—" : Model.Run.Notes)</dd>
+            </dl>
+        </div>
+    </div>
+
+    <section>
+        <h2 class="h4">Per-source stats</h2>
+        @if (!Model.HasSourceStats)
+        {
+            <div class="alert alert-secondary">No source stats recorded for this run.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                            <th>Fetched</th>
+                            <th>Upserted</th>
+                            <th>Snapshots</th>
+                            <th>Missing</th>
+                            <th>Errors</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in Model.SourceStats)
+                        {
+                            <tr>
+                                <td>@stat.Source</td>
+                                <td>@stat.FetchedCount</td>
+                                <td>@stat.UpsertedCount</td>
+                                <td>@stat.SnapshotCount</td>
+                                <td>@stat.MissingCount</td>
+                                <td>@stat.Errors</td>
+                                <td>@FormatDuration(stat.DurationMs)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <div class="mt-3">
+        <a asp-area="Admin" asp-controller="EtlOps" asp-action="Index">Back to ETL Ops</a>
+    </div>
+</div>

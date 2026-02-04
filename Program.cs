@@ -46,6 +46,8 @@ builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
 
+await EnsureRolesAsync(app.Services);
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -63,7 +65,21 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+static async Task EnsureRolesAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    if (!await roleManager.RoleExistsAsync("Administrator"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Administrator"));
+    }
+}
