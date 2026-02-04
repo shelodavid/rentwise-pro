@@ -49,6 +49,27 @@ schtasks /Query /TN "RentWisePro-ETL-Queue" /V /FO LIST
 sqlcmd -S "(localdb)\MSSQLLocalDB" -d RentWisePro -Q "SELECT TOP 20 SourceName, MAX(LastUpdatedUtc) AS LastUpdatedUtc FROM Etl.Listings GROUP BY SourceName ORDER BY LastUpdatedUtc DESC;"
 ```
 
+## How to grant the Administrator role for ETL Ops
+
+> The app seeds the `Administrator` role on startup. You must explicitly assign a user to it.
+
+1. Register or identify the user account that needs ETL Ops access.
+2. Look up the user and role IDs in SQL Server:
+
+```sql
+SELECT Id, Email FROM AspNetUsers WHERE Email = 'user@example.com';
+SELECT Id, Name FROM AspNetRoles WHERE Name = 'Administrator';
+```
+
+3. Insert the mapping in `AspNetUserRoles` (replace the GUIDs from step 2):
+
+```sql
+INSERT INTO AspNetUserRoles (UserId, RoleId)
+VALUES ('<user-id-guid>', '<role-id-guid>');
+```
+
+4. Sign out and sign back in to refresh the auth cookie.
+
 ## Where logs are
 
 - Console output is emitted by the ETL app when you run the scripts directly in PowerShell.
