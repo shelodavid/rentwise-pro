@@ -1,0 +1,186 @@
+[
+  {
+    "listing_id": "AUS-1001",
+    "address_line": "101 Barton Springs Rd",
+    "city": "Austin",
+    "state": "TX",
+    "postal_code": "78704",
+    "latitude": 30.2649,
+    "longitude": -97.7685,
+    "price": 625000,
+    "beds": 3,
+    "baths": 2.5,
+    "sqft": 1740,
+    "status": "active",
+    "property_type": "single_family",
+    "year_built": 1998,
+    "lot_size": 0.19,
+    "photos": [
+      "https://images.rentwise.dev/aus-1001/photo-01.jpg",
+      "https://images.rentwise.dev/aus-1001/photo-02.jpg",
+      "https://images.rentwise.dev/aus-1001/photo-03.jpg"
+    ],
+    "updated_at": "2024-06-01T10:00:00Z"
+  },
+  {
+    "listing_id": "AUS-1002",
+    "source_listing_id": "AUS-MLS-1002",
+    "address": {
+      "line": "500 W 2nd St",
+      "city": "Austin",
+      "state": "TX",
+      "postal_code": "78701"
+    },
+    "price": 419000,
+    "beds": 2,
+    "baths": 2,
+    "sqft": 1125,
+    "status": "active",
+    "property_type": "condo",
+    "year_built": 2006,
+    "photos": [
+      "https://images.rentwise.dev/aus-1002/photo-01.jpg"
+    ],
+    "updated_at": "2024-06-02T09:30:00Z"
+  },
+  {
+    "listing_id": "AUS-1003",
+    "address_line": "3300 North Hills Dr",
+    "city": "Austin",
+    "state": "TX",
+    "postal_code": "78731",
+    "price": 389000,
+    "baths": 1,
+    "sqft": 980,
+    "status": "active",
+    "property_type": "townhouse",
+    "year_built": 1985,
+    "updated_at": "2024-06-02T08:15:00Z"
+  },
+  {
+    "listing_id": "AUS-1005",
+    "address_line": "2401 East 6th St",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78702",
+    "price": 515000,
+    "beds": 3,
+    "baths": 2,
+    "sqft": 1405,
+    "status": "active",
+    "property_type": "duplex",
+    "year_built": 1979,
+    "photos": [
+      "https://images.rentwise.dev/aus-1005/photo-01.jpg"
+    ],
+    "updated_at": "2024-06-03T15:45:00Z"
+  },
+  {
+    "listing_id": "AUS-1006",
+    "address_line": "701 Tillery St",
+    "city": "Austin",
+    "state": "TX",
+    "postal_code": "78702",
+    "price": 285000,
+    "beds": 1,
+    "baths": 1,
+    "sqft": 640,
+    "status": "active",
+    "property_type": "studio",
+    "updated_at": "2024-06-04T11:25:00Z"
+  },
+  {
+    "listing_id": "RAL-2001",
+    "address": {
+      "line": "220 Fayetteville St",
+      "city": "Raleigh",
+      "state": "NC",
+      "postal_code": "27601"
+    },
+    "price": 379900,
+    "beds": 2,
+    "baths": 2,
+    "sqft": 1120,
+    "status": "pending",
+    "property_type": "condo",
+    "year_built": 2011,
+    "updated_at": "2024-06-01T18:05:00Z"
+  },
+  {
+    "listing_id": "RAL-2002",
+    "address_line": "1200 Glenwood Ave",
+    "city": "Raleigh",
+    "state": "NC",
+    "postal_code": "27605",
+    "price": 549000,
+    "beds": 4,
+    "baths": 2.5,
+    "sqft": 2050,
+    "status": "active",
+    "property_type": "single_family",
+    "year_built": 1994,
+    "lot_size": 0.23,
+    "photos": [
+      "https://images.rentwise.dev/ral-2002/photo-01.jpg",
+      "https://images.rentwise.dev/ral-2002/photo-02.jpg"
+    ],
+    "updated_at": "2024-06-02T13:45:00Z"
+  },
+  {
+    "listing_id": "RAL-2003",
+    "address_line": "4100 Crabtree Valley Ave",
+    "city": "Raleigh",
+    "state": "NC",
+    "postal_code": "27612",
+    "price": 312000,
+    "beds": 2,
+    "baths": 1,
+    "sqft": 880,
+    "status": "active",
+    "property_type": "condo",
+    "year_built": 1988,
+    "updated_at": "2024-06-02T16:20:00Z"
+  },
+  {
+    "listing_id": "RAL-2004",
+    "address_line": "1700 Hillsborough St",
+    "city": "Raleigh",
+    "state": "NC",
+    "postal_code": "27605",
+    "price": 468000,
+    "beds": 3,
+    "baths": 2,
+    "status": "active",
+    "property_type": "townhouse",
+    "updated_at": "2024-06-03T09:10:00Z"
+  },
+  {
+    "listing_id": "RAL-2005",
+    "address_line": "90 Oberlin Rd",
+    "city": "Raleigh",
+    "state": "NC",
+    "postal_code": "27605",
+    "price": 259000,
+    "beds": 1,
+    "baths": 1,
+    "sqft": 620,
+    "status": "active",
+    "property_type": "apartment",
+    "updated_at": "2024-06-03T10:30:00Z"
+  },
+  {
+    "listing_id": "RAL-2006",
+    "address_line": "2600 Poole Rd",
+    "city": "Raleigh",
+    "state": "NC",
+    "postal_code": "27610",
+    "price": 335000,
+    "beds": 3,
+    "baths": 1.5,
+    "sqft": 1325,
+    "status": "active",
+    "property_type": "single_family",
+    "year_built": 1972,
+    "updated_at": "2024-06-04T08:50:00Z"
+  }
+]

@@ -4,8 +4,8 @@ This folder contains deterministic JSON fixtures for the ETL listing sources. Th
 following structure:
 
 ```
-Etl.Sources/Fixtures/{source-name}/search-results.json
-Etl.Sources/Fixtures/{source-name}/listing-details/{listing-id}.json (optional)
+Etl.Sources/Fixtures/{source-name}/{scenario}/search-results.json
+Etl.Sources/Fixtures/{source-name}/{scenario}/listing-details/{listing-id}.json (optional)
 ```
 
 ## Schema
@@ -32,6 +32,5 @@ The fixture source normalizes addresses and derives a stable ID when no `listing
 
 ## Updating fixtures
 
-To simulate change detection (snapshots), replace `search-results.json` with
-`search-results.updated.json` in the same fixture folder. The updated file contains price changes
-and a status change to trigger snapshots.
+To simulate change detection (snapshots), create another scenario folder (for example `changed`)
+with updated listing records. The ETL runtime reads `Etl:FixtureScenario` to select the scenario.

@@ -58,21 +58,24 @@ builder.Services.AddHttpClient<RapidApiClient>();
 var rapidApiOptions = builder.Configuration.GetSection("RapidApi").Get<RapidApiOptions>() ?? new RapidApiOptions();
 var etlOptions = builder.Configuration.GetSection("Etl").Get<EtlOptions>() ?? new EtlOptions();
 var useFixtures = etlOptions.UseFixtures || string.IsNullOrWhiteSpace(rapidApiOptions.ApiKey);
+var fixtureRootPath = string.IsNullOrWhiteSpace(etlOptions.FixtureRootPath)
+    ? Path.Combine(Directory.GetCurrentDirectory(), "Etl.Sources", "Fixtures")
+    : etlOptions.FixtureRootPath;
+var fixtureScenario = etlOptions.FixtureScenario;
+var fixtureSources = etlOptions.FixtureSources.Count > 0
+    ? etlOptions.FixtureSources
+    : rapidApiOptions.Sources.Count > 0
+        ? rapidApiOptions.Sources.Select(source => source.Name).ToList()
+        : new List<string> { "Fixture Listings" };
 if (useFixtures)
 {
-    var fixtureRootPath = string.IsNullOrWhiteSpace(etlOptions.FixtureRootPath)
-        ? Path.Combine(Directory.GetCurrentDirectory(), "Etl.Sources", "Fixtures")
-        : etlOptions.FixtureRootPath;
-    var fixtureSources = rapidApiOptions.Sources.Count > 0
-        ? rapidApiOptions.Sources.Select(source => source.Name)
-        : new[] { "Fixture Listings" };
-
     foreach (var sourceName in fixtureSources)
     {
         builder.Services.AddSingleton<IListingSource>(sp =>
             new DevFixtureListingSource(
                 sourceName,
                 fixtureRootPath,
+                fixtureScenario,
                 sp.GetRequiredService<AddressNormalizer>(),
                 sp.GetRequiredService<HashingService>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DevFixtureListingSource>>()));
@@ -102,6 +105,16 @@ builder.Services.AddHostedService<EtlWorker>();
 builder.Services.AddHostedService<WorkQueueWorker>();
 
 var host = builder.Build();
+if (useFixtures)
+{
+    var logger = host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>()
+        .CreateLogger("EtlStartup");
+    logger.LogInformation(
+        "Using fixtures mode. Fixture root: {FixtureRoot}. Fixture sources: {FixtureSources}. Scenario: {Scenario}.",
+        fixtureRootPath,
+        string.Join(", ", fixtureSources),
+        fixtureScenario);
+}
 await host.RunAsync();
 
 static void ApplyExecutionOptions(EtlExecutionOptions options, string[] args)

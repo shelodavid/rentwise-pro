@@ -11,6 +11,7 @@ public class DevFixtureListingSource : IListingSource
 {
     private readonly string _sourceName;
     private readonly string _fixtureRootPath;
+    private readonly string _fixtureScenario;
     private readonly AddressNormalizer _addressNormalizer;
     private readonly HashingService _hashingService;
     private readonly ILogger<DevFixtureListingSource> _logger;
@@ -19,12 +20,14 @@ public class DevFixtureListingSource : IListingSource
     public DevFixtureListingSource(
         string sourceName,
         string fixtureRootPath,
+        string? fixtureScenario,
         AddressNormalizer addressNormalizer,
         HashingService hashingService,
         ILogger<DevFixtureListingSource> logger)
     {
         _sourceName = sourceName;
         _fixtureRootPath = fixtureRootPath;
+        _fixtureScenario = string.IsNullOrWhiteSpace(fixtureScenario) ? "baseline" : fixtureScenario.Trim();
         _addressNormalizer = addressNormalizer;
         _hashingService = hashingService;
         _logger = logger;
@@ -63,10 +66,14 @@ public class DevFixtureListingSource : IListingSource
     private async Task<IReadOnlyList<FixtureListing>> LoadFixtureListingsAsync(CancellationToken cancellationToken)
     {
         var sourceFolder = Path.Combine(_fixtureRootPath, NormalizeFolderName(_sourceName));
-        var searchResultsPath = Path.Combine(sourceFolder, "search-results.json");
+        var scenarioFolder = ResolveScenarioFolder(sourceFolder);
+        var searchResultsPath = Path.Combine(scenarioFolder, "search-results.json");
         if (!File.Exists(searchResultsPath))
         {
-            _logger.LogWarning("Fixture search results not found for source {Source} at {Path}", _sourceName, searchResultsPath);
+            _logger.LogWarning(
+                "Fixture search results not found for source {Source} at {Path}",
+                _sourceName,
+                searchResultsPath);
             return Array.Empty<FixtureListing>();
         }
 
@@ -79,7 +86,7 @@ public class DevFixtureListingSource : IListingSource
             return listings;
         }
 
-        var detailsFolder = Path.Combine(sourceFolder, "listing-details");
+        var detailsFolder = Path.Combine(scenarioFolder, "listing-details");
         if (!Directory.Exists(detailsFolder))
         {
             return listings;
@@ -214,6 +221,17 @@ public class DevFixtureListingSource : IListingSource
 
         var result = new string(buffer[..index]);
         return result.Trim('-');
+    }
+
+    private string ResolveScenarioFolder(string sourceFolder)
+    {
+        var scenarioFolder = Path.Combine(sourceFolder, NormalizeFolderName(_fixtureScenario));
+        if (Directory.Exists(scenarioFolder))
+        {
+            return scenarioFolder;
+        }
+
+        return sourceFolder;
     }
 
     private static string? CleanValue(string? value)

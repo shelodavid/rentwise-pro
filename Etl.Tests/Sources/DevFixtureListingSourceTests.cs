@@ -117,11 +117,36 @@ public class DevFixtureListingSourceTests
         Assert.Equal("500 WEST 6TH ST", firstListing.Address);
     }
 
-    private static DevFixtureListingSource BuildSource(string fixtureRoot, string sourceName)
+    [Fact]
+    public async Task FetchListingsAsync_ReturnsDeterministicPages()
+    {
+        var fixtureRoot = CreateFixtureRoot();
+        var listings = Enumerable.Range(1, 12).Select(index => new
+        {
+            listing_id = $"LIST-{index:000}",
+            address_line = $"{index} Main St",
+            city = "Austin",
+            state = "TX",
+            postal_code = "78701",
+            updated_at = "2024-05-01T00:00:00Z"
+        });
+        await WriteFixtureAsync(fixtureRoot, "fixture-source", listings);
+
+        var source = BuildSource(fixtureRoot, "fixture-source");
+
+        var page2 = await source.FetchListingsAsync(new SourceFetchRequest(2, 5, null), CancellationToken.None);
+
+        Assert.Equal(5, page2.Count);
+        Assert.Equal("LIST-006", page2[0].SourceListingId);
+        Assert.Equal("LIST-010", page2[^1].SourceListingId);
+    }
+
+    private static DevFixtureListingSource BuildSource(string fixtureRoot, string sourceName, string? scenario = null)
     {
         return new DevFixtureListingSource(
             sourceName,
             fixtureRoot,
+            scenario,
             new AddressNormalizer(),
             new HashingService(),
             NullLogger<DevFixtureListingSource>.Instance);
