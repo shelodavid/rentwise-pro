@@ -1,0 +1,22 @@
+{
+  "listing_id": "AUS-1002",
+  "address": {
+    "line": "500 W 2nd St",
+    "city": "Austin",
+    "state": "TX",
+    "postal_code": "78701"
+  },
+  "price": 431500,
+  "beds": 2,
+  "baths": 2,
+  "sqft": 1125,
+  "status": "active",
+  "property_type": "condo",
+  "year_built": 2006,
+  "photos": [
+    "https://images.rentwise.dev/aus-1002/photo-01.jpg",
+    "https://images.rentwise.dev/aus-1002/photo-02.jpg",
+    "https://images.rentwise.dev/aus-1002/photo-03.jpg"
+  ],
+  "updated_at": "2024-05-12T12:00:00Z"
+}
