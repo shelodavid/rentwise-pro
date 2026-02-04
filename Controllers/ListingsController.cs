@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
+using RentWisePro.Web.Domain.Entities.Etl;
 using RentWisePro.Web.Models;
 
 namespace RentWisePro.Web.Controllers;
@@ -33,7 +34,7 @@ public class ListingsController : Controller
         string? state,
         string? sortBy)
     {
-        var listingsQuery = _dbContext.EtlListings
+        IQueryable<EtlListing> listingsQuery = _dbContext.EtlListings
             .AsNoTracking()
             .Include(listing => listing.Property);
 
