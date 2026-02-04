@@ -33,6 +33,10 @@ public class EtlDbContext : DbContext
             entity.Property(e => e.State).HasMaxLength(50);
             entity.Property(e => e.Zip).HasMaxLength(20);
             entity.Property(e => e.PropertyType).HasMaxLength(100);
+            entity.Property(e => e.Beds).HasPrecision(4, 1);
+            entity.Property(e => e.Baths).HasPrecision(4, 1);
+            entity.Property(e => e.Latitude).HasPrecision(9, 6);
+            entity.Property(e => e.Longitude).HasPrecision(9, 6);
             entity.HasIndex(e => e.NormalizedAddressHash).IsUnique();
         });
 
@@ -43,6 +47,7 @@ public class EtlDbContext : DbContext
             entity.Property(e => e.Source).HasMaxLength(100).IsRequired();
             entity.Property(e => e.SourceListingId).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Price).HasColumnType("decimal(18,0)");
             entity.Property(e => e.Currency).HasMaxLength(10).HasDefaultValue("USD");
             entity.Property(e => e.MaterialHash).HasMaxLength(128).IsRequired();
             entity.HasIndex(e => new { e.Source, e.SourceListingId }).IsUnique();
@@ -56,6 +61,7 @@ public class EtlDbContext : DbContext
             entity.ToTable("listing_snapshots");
             entity.HasKey(e => e.SnapshotId);
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Price).HasColumnType("decimal(18,0)");
             entity.Property(e => e.MaterialHash).HasMaxLength(128).IsRequired();
             entity.HasIndex(e => new { e.ListingId, e.ScrapedAt });
         });
