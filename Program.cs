@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 using RentWisePro.Web.Models.Identity;
 using RentWisePro.Web.Services;
+using RentWisePro.Web.Services.Etl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<ForecastCalculationService>();
 builder.Services.AddScoped<ClosingDisclosureCalculationService>();
 builder.Services.AddScoped<InvestmentProfileResolver>();
-builder.Services.AddScoped<EtlOpsMetricsService>();
+builder.Services.AddScoped<IEtlControlService, LocalEtlControlService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
