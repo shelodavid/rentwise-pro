@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RentWisePro.Web.Models.Identity;
+
 namespace RentWisePro.Web.Controllers;
 
-[Authorize(Roles = "Administrator")]
+[Authorize(Roles = RoleNames.Admin)]
 public class ListingsController : Controller
 {
     [HttpGet]

@@ -46,7 +46,11 @@ builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
 
-await EnsureRolesAsync(app.Services);
+await RentWisePro.Web.Services.AdminBootstrapper.RunAsync(
+    app.Services,
+    app.Configuration,
+    app.Environment,
+    app.Logger);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -73,13 +77,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
-static async Task EnsureRolesAsync(IServiceProvider services)
-{
-    using var scope = services.CreateScope();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    if (!await roleManager.RoleExistsAsync("Administrator"))
-    {
-        await roleManager.CreateAsync(new IdentityRole("Administrator"));
-    }
-}

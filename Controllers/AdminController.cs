@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 using RentWisePro.Web.Models;
+using RentWisePro.Web.Models.Identity;
 using RentWisePro.Web.Services.Etl;
 
 namespace RentWisePro.Web.Controllers;
 
-[Authorize(Roles = "Administrator")]
+[Authorize(Roles = RoleNames.Admin)]
 public class AdminController : Controller
 {
     private readonly IEtlControlService _etlControlService;
