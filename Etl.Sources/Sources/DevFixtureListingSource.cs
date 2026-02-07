@@ -382,7 +382,7 @@ public class DevFixtureListingSource : IListingSource
             return reader.TokenType switch
             {
                 JsonTokenType.String => reader.GetString(),
-                JsonTokenType.Number => reader.GetRawText(),
+                JsonTokenType.Number => ReadRawNumberAsString(ref reader),
                 JsonTokenType.Null => null,
                 _ => throw new JsonException($"Unsupported token type {reader.TokenType} for flexible string.")
             };
@@ -397,6 +397,12 @@ public class DevFixtureListingSource : IListingSource
             }
 
             writer.WriteStringValue(value);
+        }
+
+        private static string ReadRawNumberAsString(ref Utf8JsonReader reader)
+        {
+            using var document = JsonDocument.ParseValue(ref reader);
+            return document.RootElement.GetRawText();
         }
     }
 }
