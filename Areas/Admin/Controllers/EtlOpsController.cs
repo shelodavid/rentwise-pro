@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RentWisePro.Web.Models.Identity;
 using RentWisePro.Web.Services;
 
 namespace RentWisePro.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = RoleNames.Admin)]
 public class EtlOpsController : Controller
 {
     private readonly EtlOpsMetricsService _metricsService;
