@@ -47,7 +47,7 @@ builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
 
-await AdminBootstrapper.RunAsync(
+await RentWisePro.Web.Services.AdminBootstrapper.RunAsync(
     app.Services,
     app.Configuration,
     app.Environment,
