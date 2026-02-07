@@ -47,10 +47,11 @@ builder.Services.AddScoped<PurchaseSheetCalculationService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    await AdminBootstrapper.EnsureAdminAsync(app.Services, app.Configuration);
-}
+await AdminBootstrapper.RunAsync(
+    app.Services,
+    app.Configuration,
+    app.Environment,
+    app.Logger);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
