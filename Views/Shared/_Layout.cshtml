@@ -56,7 +56,7 @@
                 <a class="nav-link @NavClass("Home", "Privacy")" asp-controller="Home" asp-action="Privacy">
                     Privacy
                 </a>
-                @if (User.IsInRole("Administrator"))
+                @if (User.IsInRole(RoleNames.Admin))
                 {
                     <div class="nav-link text-uppercase text-muted small mt-3">Admin</div>
                     <a class="nav-link @NavClass("EtlOps", "Index", "Admin")" asp-area="Admin" asp-controller="EtlOps" asp-action="Index">
