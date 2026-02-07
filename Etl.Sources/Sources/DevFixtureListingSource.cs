@@ -125,7 +125,7 @@ public class DevFixtureListingSource : IListingSource
         var addressLine = CleanValue(fixture.Address?.Line) ?? CleanValue(fixture.AddressLine);
         var city = CleanValue(fixture.Address?.City) ?? CleanValue(fixture.City);
         var state = NormalizeState(CleanValue(fixture.Address?.State) ?? CleanValue(fixture.State));
-        var zip = CleanValue(fixture.Address?.PostalCode) ?? CleanValue(fixture.Zip);
+        var zip = ResolveZip(fixture);
 
         var normalizedAddress = _addressNormalizer.Normalize(addressLine);
         var sourceListingId = GetListingIdentifier(fixture);
@@ -181,7 +181,10 @@ public class DevFixtureListingSource : IListingSource
             AddressLine = detail.AddressLine ?? baseListing.AddressLine,
             City = detail.City ?? baseListing.City,
             State = detail.State ?? baseListing.State,
+            PostalCode = detail.PostalCode ?? baseListing.PostalCode,
+            PostalCodeCamel = detail.PostalCodeCamel ?? baseListing.PostalCodeCamel,
             Zip = detail.Zip ?? baseListing.Zip,
+            ZipCode = detail.ZipCode ?? baseListing.ZipCode,
             Latitude = detail.Latitude ?? baseListing.Latitude,
             Longitude = detail.Longitude ?? baseListing.Longitude,
             Price = detail.Price ?? baseListing.Price,
@@ -239,6 +242,33 @@ public class DevFixtureListingSource : IListingSource
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
+    private static string? ResolveZip(FixtureListing fixture)
+    {
+        return FirstNonEmpty(
+            fixture.Address?.PostalCode,
+            fixture.Address?.PostalCodeCamel,
+            fixture.Address?.Zip,
+            fixture.Address?.ZipCode,
+            fixture.PostalCode,
+            fixture.PostalCodeCamel,
+            fixture.Zip,
+            fixture.ZipCode);
+    }
+
+    private static string? FirstNonEmpty(params string?[] values)
+    {
+        foreach (var value in values)
+        {
+            var cleaned = CleanValue(value);
+            if (!string.IsNullOrWhiteSpace(cleaned))
+            {
+                return cleaned;
+            }
+        }
+
+        return null;
+    }
+
     private static string? NormalizeState(string? state)
     {
         return string.IsNullOrWhiteSpace(state) ? null : state.Trim().ToUpperInvariant();
@@ -265,10 +295,20 @@ public class DevFixtureListingSource : IListingSource
         public string? State { get; init; }
 
         [JsonPropertyName("postal_code")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
         public string? PostalCode { get; init; }
 
+        [JsonPropertyName("postalCode")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
+        public string? PostalCodeCamel { get; init; }
+
         [JsonPropertyName("zip")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
         public string? Zip { get; init; }
+
+        [JsonPropertyName("zipcode")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
+        public string? ZipCode { get; init; }
 
         [JsonPropertyName("latitude")]
         public decimal? Latitude { get; init; }
@@ -319,6 +359,44 @@ public class DevFixtureListingSource : IListingSource
         public string? State { get; init; }
 
         [JsonPropertyName("postal_code")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
         public string? PostalCode { get; init; }
+
+        [JsonPropertyName("postalCode")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
+        public string? PostalCodeCamel { get; init; }
+
+        [JsonPropertyName("zip")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
+        public string? Zip { get; init; }
+
+        [JsonPropertyName("zipcode")]
+        [JsonConverter(typeof(FlexibleStringConverter))]
+        public string? ZipCode { get; init; }
+    }
+
+    private sealed class FlexibleStringConverter : JsonConverter<string?>
+    {
+        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.TokenType switch
+            {
+                JsonTokenType.String => reader.GetString(),
+                JsonTokenType.Number => reader.GetRawText(),
+                JsonTokenType.Null => null,
+                _ => throw new JsonException($"Unsupported token type {reader.TokenType} for flexible string.")
+            };
+        }
+
+        public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
+        {
+            if (value is null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+
+            writer.WriteStringValue(value);
+        }
     }
 }
