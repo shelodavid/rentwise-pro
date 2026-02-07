@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentWisePro.Web.Data;
 
@@ -8,10 +9,12 @@ namespace RentWisePro.Web.Controllers
     public class DiagnosticsController : Controller
     {
         private readonly RentWiseProDbContext _db;
+        private readonly IWebHostEnvironment _environment;
 
-        public DiagnosticsController(RentWiseProDbContext db)
+        public DiagnosticsController(RentWiseProDbContext db, IWebHostEnvironment environment)
         {
             _db = db;
+            _environment = environment;
         }
 
         [HttpGet("db")]
@@ -33,7 +36,30 @@ namespace RentWisePro.Web.Controllers
                     rentalListings = listingCount,
                     savedPropertyProfiles = savedCount,
                     listingCount = count
+                }
+            });
         }
+
+        [HttpGet("whoami")]
+        public IActionResult WhoAmI()
+        {
+            if (!_environment.IsDevelopment())
+            {
+                return NotFound();
+            }
+
+            var roles = User.Claims
+                .Where(claim => claim.Type == ClaimTypes.Role)
+                .Select(claim => claim.Value)
+                .ToArray();
+
+            return Ok(new
+            {
+                isAuthenticated = User.Identity?.IsAuthenticated ?? false,
+                name = User.Identity?.Name,
+                email = User.FindFirstValue(ClaimTypes.Email),
+                roles,
+                claims = User.Claims.Select(claim => new { claim.Type, claim.Value })
             });
         }
     }
