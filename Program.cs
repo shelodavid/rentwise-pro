@@ -4,6 +4,7 @@ using RentWisePro.Web.Data;
 using RentWisePro.Web.Models.Identity;
 using RentWisePro.Web.Services;
 using RentWisePro.Web.Services.Etl;
+using RentWisePro.Web.Services.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
