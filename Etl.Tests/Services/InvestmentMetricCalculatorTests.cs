@@ -22,7 +22,8 @@ public class InvestmentMetricCalculatorTests
 
         Assert.Equal(1200m, metrics.EstimatedRent);
         Assert.Equal(0.01m, metrics.RprMonthly);
-        Assert.Equal(8.333333m, metrics.Grm, 6);
+        Assert.NotNull(metrics.Grm);
+        Assert.InRange(metrics.Grm.Value, 8.333332m, 8.333334m);
 
         var expectedCashFlow = 1200m
                                - (120000m * 0.01m / 12m)
