@@ -42,10 +42,26 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.Property<int?>("SquareFeet");
             entity.Property<decimal?>("Beds").HasPrecision(4, 1);
             entity.Property<decimal?>("Baths").HasPrecision(4, 1);
+            entity.Property<decimal?>("EstimatedMonthlyRent").HasColumnType("decimal(18,2)");
+            entity.Property<string>("RentEstimateSource").HasMaxLength(50);
+            entity.Property<DateTimeOffset?>("RentEstimateAsOf");
             entity.Property<int>("NormalizationVersion");
             entity.Property<DateTimeOffset>("CreatedAt");
             entity.Property<DateTimeOffset>("UpdatedAt");
             entity.HasIndex("NormalizedAddressHash").IsUnique();
+        });
+
+        modelBuilder.Entity("RentWisePro.Etl.Core.Entities.HudFairMarketRent", entity =>
+        {
+            entity.ToTable("hud_fmr");
+            entity.HasKey("Year", "GeoCode", "Bedrooms");
+            entity.Property<int>("Year");
+            entity.Property<string>("GeoCode").HasMaxLength(20);
+            entity.Property<int>("Bedrooms");
+            entity.Property<decimal>("FmrMonthlyRent").HasColumnType("decimal(18,2)");
+            entity.Property<string>("Source").HasMaxLength(50).HasDefaultValue("HUD");
+            entity.Property<DateTimeOffset>("ImportedAt");
+            entity.HasIndex("GeoCode", "Year");
         });
 
         modelBuilder.Entity("RentWisePro.Etl.Core.Entities.RawPayloadRef", entity =>

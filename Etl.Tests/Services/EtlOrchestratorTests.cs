@@ -18,11 +18,13 @@ public class EtlOrchestratorTests
         var source = new FakeListingSource();
         var repository = new FakeEtlRepository();
         var rawPayloadStore = new FakeRawPayloadStore();
+        var rentEstimators = new[] { new FakeRentEstimator() };
         var options = Options.Create(new EtlOptions { MaxPhotosPerProperty = 10 });
         var orchestrator = new EtlOrchestrator(
             new[] { source },
             repository,
             rawPayloadStore,
+            rentEstimators,
             new AddressNormalizer(),
             new HashingService(),
             new MaterialHashBuilder(new HashingService()),
@@ -75,6 +77,16 @@ public class EtlOrchestratorTests
         }
     }
 
+    private sealed class FakeRentEstimator : IRentEstimator
+    {
+        public int Priority => 0;
+
+        public Task<RentEstimate?> EstimateAsync(Property property, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<RentEstimate?>(null);
+        }
+    }
+
     private sealed class FakeEtlRepository : IEtlRepository
     {
         public List<WorkQueueItem> WorkItems { get; } = new();
@@ -102,6 +114,11 @@ public class EtlOrchestratorTests
         public Task<Property> GetOrCreatePropertyAsync(SourceListing listing, string normalizedAddress, string normalizedHash, CancellationToken cancellationToken)
         {
             return Task.FromResult(new Property { PropertyId = Guid.NewGuid() });
+        }
+
+        public Task UpdateRentEstimateAsync(Property property, RentEstimate estimate, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         public Task<ListingUpsertResult> UpsertListingAsync(Property property, string source, SourceListing listing, string materialHash, DateTimeOffset seenAt, CancellationToken cancellationToken)

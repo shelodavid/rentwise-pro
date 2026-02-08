@@ -17,6 +17,9 @@ public class Property
     public int? SquareFeet { get; set; }
     public decimal? Beds { get; set; }
     public decimal? Baths { get; set; }
+    public decimal? EstimatedMonthlyRent { get; set; }
+    public string? RentEstimateSource { get; set; }
+    public DateTimeOffset? RentEstimateAsOf { get; set; }
     public int NormalizationVersion { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
