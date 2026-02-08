@@ -1,35 +1,34 @@
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RentWisePro.Etl.Core.Entities;
 using RentWisePro.Etl.Core.Models;
 using RentWisePro.Etl.Persistence.Contexts;
 
-namespace RentWisePro.Etl.Services;
+namespace RentWisePro.Etl.ReferenceData;
 
-public class HudFmrImportService
+public class GeoMarketStatsImporter
 {
     private readonly EtlDbContext _dbContext;
-    private readonly ILogger<HudFmrImportService> _logger;
+    private readonly ILogger<GeoMarketStatsImporter> _logger;
 
-    public HudFmrImportService(EtlDbContext dbContext, ILogger<HudFmrImportService> logger)
+    public GeoMarketStatsImporter(EtlDbContext dbContext, ILogger<GeoMarketStatsImporter> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
     }
 
-    public async Task<int> ImportAsync(string csvPath, CancellationToken cancellationToken)
+    public async Task<int> ImportAsync(string csvPath, int yearOverride, string geoTypeOverride, CancellationToken cancellationToken)
     {
         if (!File.Exists(csvPath))
         {
-            _logger.LogWarning("HUD FMR CSV not found at {Path}.", csvPath);
+            _logger.LogWarning("ACS CSV not found at {Path}.", csvPath);
             return 0;
         }
 
         var lines = await File.ReadAllLinesAsync(csvPath, cancellationToken);
         if (lines.Length <= 1)
         {
-            _logger.LogWarning("HUD FMR CSV at {Path} does not contain data rows.", csvPath);
+            _logger.LogWarning("ACS CSV at {Path} does not contain data rows.", csvPath);
             return 0;
         }
 
@@ -37,6 +36,7 @@ public class HudFmrImportService
         var headerIndex = BuildHeaderIndex(headers);
         var now = DateTimeOffset.UtcNow;
         var processed = 0;
+        var defaultGeoType = string.IsNullOrWhiteSpace(geoTypeOverride) ? GeoTypes.Zip : geoTypeOverride.ToUpperInvariant();
 
         for (var i = 1; i < lines.Length; i++)
         {
@@ -49,64 +49,77 @@ public class HudFmrImportService
             if (!TryGet(values, headerIndex, "Year", out var yearText) ||
                 !int.TryParse(yearText, out var year))
             {
+                if (yearOverride > 0)
+                {
+                    year = yearOverride;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if (yearOverride > 0 && year != yearOverride)
+            {
                 continue;
             }
 
             if (!TryGet(values, headerIndex, "GeoKey", out var geoKey) || string.IsNullOrWhiteSpace(geoKey))
             {
-                if (!TryGet(values, headerIndex, "GeoCode", out geoKey) || string.IsNullOrWhiteSpace(geoKey))
-                {
-                    continue;
-                }
-            }
-
-            if (!TryGet(values, headerIndex, "Bedrooms", out var bedroomsText) ||
-                !int.TryParse(bedroomsText, out var bedrooms))
-            {
                 continue;
-            }
-
-            if (!TryGet(values, headerIndex, "Fmr", out var rentText) ||
-                !decimal.TryParse(rentText, NumberStyles.Number, CultureInfo.InvariantCulture, out var rent))
-            {
-                if (!TryGet(values, headerIndex, "FmrMonthlyRent", out rentText) ||
-                    !decimal.TryParse(rentText, NumberStyles.Number, CultureInfo.InvariantCulture, out rent))
-                {
-                    continue;
-                }
             }
 
             var geoType = TryGet(values, headerIndex, "GeoType", out var geoTypeText) && !string.IsNullOrWhiteSpace(geoTypeText)
                 ? geoTypeText.ToUpperInvariant()
-                : GeoTypes.Zip;
+                : defaultGeoType;
+
+            if (!TryGet(values, headerIndex, "VacancyRate", out var vacancyText) ||
+                !decimal.TryParse(vacancyText, NumberStyles.Number, CultureInfo.InvariantCulture, out var vacancy))
+            {
+                continue;
+            }
+
+            if (!TryGet(values, headerIndex, "MedianHouseholdIncome", out var incomeText) ||
+                !decimal.TryParse(incomeText, NumberStyles.Number, CultureInfo.InvariantCulture, out var income))
+            {
+                continue;
+            }
 
             var source = TryGet(values, headerIndex, "Source", out var sourceText) && !string.IsNullOrWhiteSpace(sourceText)
                 ? sourceText
-                : "HUD";
+                : "ACS";
 
-            var existing = await _dbContext.HudFairMarketRents.FindAsync(
-                new object[] { geoType, geoKey, year, bedrooms },
+            var retrievedAt = now;
+            if (TryGet(values, headerIndex, "RetrievedAt", out var retrievedText) &&
+                DateTimeOffset.TryParse(retrievedText, out var parsedRetrieved))
+            {
+                retrievedAt = parsedRetrieved;
+            }
+
+            var existing = await _dbContext.GeoMarketStats.FindAsync(
+                new object[] { geoType, geoKey, year },
                 cancellationToken);
 
             if (existing is null)
             {
-                existing = new HudFairMarketRent
+                existing = new GeoMarketStat
                 {
                     Year = year,
                     GeoKey = geoKey,
                     GeoType = geoType,
-                    Bedrooms = bedrooms,
-                    Fmr = rent,
+                    VacancyRate = vacancy,
+                    MedianHouseholdIncome = income,
                     Source = source,
-                    RetrievedAt = now
+                    RetrievedAt = retrievedAt
                 };
-                _dbContext.HudFairMarketRents.Add(existing);
+                _dbContext.GeoMarketStats.Add(existing);
             }
             else
             {
-                existing.Fmr = rent;
+                existing.VacancyRate = vacancy;
+                existing.MedianHouseholdIncome = income;
                 existing.Source = source;
-                existing.RetrievedAt = now;
+                existing.RetrievedAt = retrievedAt;
             }
 
             processed += 1;

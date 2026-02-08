@@ -11,6 +11,7 @@ public class EtlDbContext : DbContext
 
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<HudFairMarketRent> HudFairMarketRents => Set<HudFairMarketRent>();
+    public DbSet<GeoMarketStat> GeoMarketStats => Set<GeoMarketStat>();
     public DbSet<Listing> Listings => Set<Listing>();
     public DbSet<ListingMetricSnapshot> ListingMetricSnapshots => Set<ListingMetricSnapshot>();
     public DbSet<ListingSnapshot> ListingSnapshots => Set<ListingSnapshot>();
@@ -47,11 +48,25 @@ public class EtlDbContext : DbContext
         modelBuilder.Entity<HudFairMarketRent>(entity =>
         {
             entity.ToTable("hud_fmr");
-            entity.HasKey(e => new { e.Year, e.GeoCode, e.Bedrooms });
-            entity.Property(e => e.GeoCode).HasMaxLength(20).IsRequired();
-            entity.Property(e => e.FmrMonthlyRent).HasColumnType("decimal(18,2)");
+            entity.HasKey(e => new { e.GeoType, e.GeoKey, e.Year, e.Bedrooms });
+            entity.Property(e => e.GeoKey).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.GeoType).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Fmr).HasColumnType("decimal(18,2)");
             entity.Property(e => e.Source).HasMaxLength(50).HasDefaultValue("HUD");
-            entity.HasIndex(e => new { e.GeoCode, e.Year });
+            entity.HasIndex(e => new { e.GeoType, e.GeoKey, e.Year });
+            entity.HasIndex(e => new { e.GeoType, e.GeoKey, e.Year, e.Bedrooms });
+        });
+
+        modelBuilder.Entity<GeoMarketStat>(entity =>
+        {
+            entity.ToTable("geo_market_stats");
+            entity.HasKey(e => new { e.GeoType, e.GeoKey, e.Year });
+            entity.Property(e => e.GeoKey).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.GeoType).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.VacancyRate).HasColumnType("decimal(6,3)");
+            entity.Property(e => e.MedianHouseholdIncome).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Source).HasMaxLength(50).HasDefaultValue("ACS");
+            entity.HasIndex(e => new { e.GeoType, e.GeoKey, e.Year });
         });
 
         modelBuilder.Entity<Listing>(entity =>

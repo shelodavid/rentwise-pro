@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.23" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
@@ -20,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Etl.Core\RentWisePro.Etl.Core.csproj" />
     <ProjectReference Include="..\Etl.Persistence\RentWisePro.Etl.Persistence.csproj" />
+    <ProjectReference Include="..\Etl.ReferenceData\RentWisePro.Etl.ReferenceData.csproj" />
     <ProjectReference Include="..\Etl.Sources\RentWisePro.Etl.Sources.csproj" />
   </ItemGroup>
 </Project>
