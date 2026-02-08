@@ -16,6 +16,7 @@ public class MaterialHashBuilder
         var parts = new[]
         {
             listing.Price?.ToString("0.##") ?? string.Empty,
+            listing.MonthlyRent?.ToString("0.##") ?? string.Empty,
             listing.Status ?? string.Empty,
             listing.Beds?.ToString("0.##") ?? string.Empty,
             listing.Baths?.ToString("0.##") ?? string.Empty,

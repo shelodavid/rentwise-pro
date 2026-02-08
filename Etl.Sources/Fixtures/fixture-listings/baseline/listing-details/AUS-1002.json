@@ -18,5 +18,6 @@
     "https://images.rentwise.dev/aus-1002/photo-02.jpg",
     "https://images.rentwise.dev/aus-1002/photo-03.jpg"
   ],
-  "updated_at": "2024-05-12T12:00:00Z"
+  "updated_at": "2024-05-12T12:00:00Z",
+  "rent": 3667.75
 }

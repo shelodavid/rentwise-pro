@@ -144,6 +144,7 @@ public class DevFixtureListingSource : IListingSource
             Latitude = fixture.Latitude,
             Longitude = fixture.Longitude,
             Price = fixture.Price,
+            MonthlyRent = fixture.MonthlyRent,
             Beds = fixture.Beds,
             Baths = fixture.Baths,
             SquareFeet = fixture.SquareFeet,
@@ -188,6 +189,7 @@ public class DevFixtureListingSource : IListingSource
             Latitude = detail.Latitude ?? baseListing.Latitude,
             Longitude = detail.Longitude ?? baseListing.Longitude,
             Price = detail.Price ?? baseListing.Price,
+            MonthlyRent = detail.MonthlyRent ?? baseListing.MonthlyRent,
             Beds = detail.Beds ?? baseListing.Beds,
             Baths = detail.Baths ?? baseListing.Baths,
             SquareFeet = detail.SquareFeet ?? baseListing.SquareFeet,
@@ -318,6 +320,9 @@ public class DevFixtureListingSource : IListingSource
 
         [JsonPropertyName("price")]
         public decimal? Price { get; init; }
+
+        [JsonPropertyName("rent")]
+        public decimal? MonthlyRent { get; init; }
 
         [JsonPropertyName("beds")]
         public decimal? Beds { get; init; }

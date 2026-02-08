@@ -20,7 +20,8 @@
       "https://images.rentwise.dev/aus-1001/photo-02.jpg",
       "https://images.rentwise.dev/aus-1001/photo-03.jpg"
     ],
-    "updated_at": "2024-06-01T10:00:00Z"
+    "updated_at": "2024-06-01T10:00:00Z",
+    "rent": 5312.5
   },
   {
     "listing_id": "AUS-1002",
@@ -41,7 +42,8 @@
     "photos": [
       "https://images.rentwise.dev/aus-1002/photo-01.jpg"
     ],
-    "updated_at": "2024-06-02T09:30:00Z"
+    "updated_at": "2024-06-02T09:30:00Z",
+    "rent": 3561.5
   },
   {
     "listing_id": "AUS-1003",
@@ -55,7 +57,8 @@
     "status": "active",
     "property_type": "townhouse",
     "year_built": 1985,
-    "updated_at": "2024-06-02T08:15:00Z"
+    "updated_at": "2024-06-02T08:15:00Z",
+    "rent": 3306.5
   },
   {
     "listing_id": "AUS-1005",
@@ -73,7 +76,8 @@
     "photos": [
       "https://images.rentwise.dev/aus-1005/photo-01.jpg"
     ],
-    "updated_at": "2024-06-03T15:45:00Z"
+    "updated_at": "2024-06-03T15:45:00Z",
+    "rent": 4377.5
   },
   {
     "listing_id": "AUS-1006",
@@ -87,7 +91,8 @@
     "sqft": 640,
     "status": "active",
     "property_type": "studio",
-    "updated_at": "2024-06-04T11:25:00Z"
+    "updated_at": "2024-06-04T11:25:00Z",
+    "rent": 2422.5
   },
   {
     "listing_id": "RAL-2001",
@@ -104,7 +109,8 @@
     "status": "pending",
     "property_type": "condo",
     "year_built": 2011,
-    "updated_at": "2024-06-01T18:05:00Z"
+    "updated_at": "2024-06-01T18:05:00Z",
+    "rent": 3229.15
   },
   {
     "listing_id": "RAL-2002",
@@ -124,7 +130,8 @@
       "https://images.rentwise.dev/ral-2002/photo-01.jpg",
       "https://images.rentwise.dev/ral-2002/photo-02.jpg"
     ],
-    "updated_at": "2024-06-02T13:45:00Z"
+    "updated_at": "2024-06-02T13:45:00Z",
+    "rent": 4666.5
   },
   {
     "listing_id": "RAL-2003",
@@ -139,7 +146,8 @@
     "status": "active",
     "property_type": "condo",
     "year_built": 1988,
-    "updated_at": "2024-06-02T16:20:00Z"
+    "updated_at": "2024-06-02T16:20:00Z",
+    "rent": 2652.0
   },
   {
     "listing_id": "RAL-2004",
@@ -152,7 +160,8 @@
     "baths": 2,
     "status": "active",
     "property_type": "townhouse",
-    "updated_at": "2024-06-03T09:10:00Z"
+    "updated_at": "2024-06-03T09:10:00Z",
+    "rent": 3978.0
   },
   {
     "listing_id": "RAL-2005",
@@ -166,7 +175,8 @@
     "sqft": 620,
     "status": "active",
     "property_type": "apartment",
-    "updated_at": "2024-06-03T10:30:00Z"
+    "updated_at": "2024-06-03T10:30:00Z",
+    "rent": 2201.5
   },
   {
     "listing_id": "RAL-2006",
@@ -181,6 +191,7 @@
     "status": "active",
     "property_type": "single_family",
     "year_built": 1972,
-    "updated_at": "2024-06-04T08:50:00Z"
+    "updated_at": "2024-06-04T08:50:00Z",
+    "rent": 2847.5
   }
 ]

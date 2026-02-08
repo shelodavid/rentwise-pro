@@ -25,10 +25,12 @@ public class EtlOrchestratorTests
             repository,
             rawPayloadStore,
             rentEstimators,
+            new FakeMedianIncomeLookup(),
             new AddressNormalizer(),
             new HashingService(),
             new MaterialHashBuilder(new HashingService()),
             new SnapshotDecider(),
+            new InvestmentMetricCalculator(),
             options,
             NullLogger<EtlOrchestrator>.Instance);
 
@@ -121,7 +123,14 @@ public class EtlOrchestratorTests
             return Task.CompletedTask;
         }
 
-        public Task<ListingUpsertResult> UpsertListingAsync(Property property, string source, SourceListing listing, string materialHash, DateTimeOffset seenAt, CancellationToken cancellationToken)
+        public Task<ListingUpsertResult> UpsertListingAsync(
+            Property property,
+            string source,
+            SourceListing listing,
+            string materialHash,
+            DateTimeOffset seenAt,
+            ListingInvestmentMetrics metrics,
+            CancellationToken cancellationToken)
         {
             var entity = new Listing
             {
@@ -150,6 +159,14 @@ public class EtlOrchestratorTests
         public Task MarkMissingListingsAsync(string source, DateTimeOffset runStartedAt, int missingRunsThreshold, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
+        }
+    }
+
+    private sealed class FakeMedianIncomeLookup : IMedianIncomeLookup
+    {
+        public Task<decimal?> GetMedianMonthlyIncomeAsync(Property property, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<decimal?>(null);
         }
     }
 }

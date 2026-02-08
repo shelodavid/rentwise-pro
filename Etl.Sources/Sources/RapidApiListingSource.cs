@@ -77,6 +77,7 @@ public class RapidApiListingSource : IListingSource
                 Latitude = GetDecimal(item, "lat") ?? GetDecimal(item, "latitude"),
                 Longitude = GetDecimal(item, "lng") ?? GetDecimal(item, "longitude"),
                 Price = GetDecimal(item, "price") ?? GetDecimal(item, "listPrice"),
+                MonthlyRent = GetDecimal(item, "rent") ?? GetDecimal(item, "monthlyRent") ?? GetDecimal(item, "estimatedRent"),
                 Beds = GetDecimal(item, "beds") ?? GetDecimal(item, "bedrooms"),
                 Baths = GetDecimal(item, "baths") ?? GetDecimal(item, "bathrooms"),
                 SquareFeet = GetInt(item, "sqft") ?? GetInt(item, "livingArea"),
