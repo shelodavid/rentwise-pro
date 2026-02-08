@@ -116,7 +116,7 @@ if (executionOptions.ImportHudFmr)
     var importer = scope.ServiceProvider.GetRequiredService<HudFmrImportService>();
     var logger = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>()
         .CreateLogger("HudFmrImport");
-    var csvPath = Path.Combine(fixtureRootPath, "Hud", "hud_fmr_sample.csv");
+    var csvPath = Path.Combine(fixtureRootPath, "ReferenceData", "Hud", "hud_fmr_sample.csv");
     var imported = await importer.ImportAsync(csvPath, CancellationToken.None);
     logger.LogInformation("HUD FMR import completed. Rows processed: {Imported}.", imported);
     return;

@@ -1,24 +1,23 @@
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RentWisePro.Etl.Core.Entities;
 using RentWisePro.Etl.Core.Models;
 using RentWisePro.Etl.Persistence.Contexts;
 
-namespace RentWisePro.Etl.Services;
+namespace RentWisePro.Etl.ReferenceData;
 
-public class HudFmrImportService
+public class HudFmrReferenceImporter
 {
     private readonly EtlDbContext _dbContext;
-    private readonly ILogger<HudFmrImportService> _logger;
+    private readonly ILogger<HudFmrReferenceImporter> _logger;
 
-    public HudFmrImportService(EtlDbContext dbContext, ILogger<HudFmrImportService> logger)
+    public HudFmrReferenceImporter(EtlDbContext dbContext, ILogger<HudFmrReferenceImporter> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
     }
 
-    public async Task<int> ImportAsync(string csvPath, CancellationToken cancellationToken)
+    public async Task<int> ImportAsync(string csvPath, int yearOverride, string geoTypeOverride, CancellationToken cancellationToken)
     {
         if (!File.Exists(csvPath))
         {
@@ -37,6 +36,7 @@ public class HudFmrImportService
         var headerIndex = BuildHeaderIndex(headers);
         var now = DateTimeOffset.UtcNow;
         var processed = 0;
+        var defaultGeoType = string.IsNullOrWhiteSpace(geoTypeOverride) ? GeoTypes.Zip : geoTypeOverride.ToUpperInvariant();
 
         for (var i = 1; i < lines.Length; i++)
         {
@@ -48,6 +48,18 @@ public class HudFmrImportService
             var values = lines[i].Split(',', StringSplitOptions.TrimEntries);
             if (!TryGet(values, headerIndex, "Year", out var yearText) ||
                 !int.TryParse(yearText, out var year))
+            {
+                if (yearOverride > 0)
+                {
+                    year = yearOverride;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            if (yearOverride > 0 && year != yearOverride)
             {
                 continue;
             }
@@ -78,11 +90,18 @@ public class HudFmrImportService
 
             var geoType = TryGet(values, headerIndex, "GeoType", out var geoTypeText) && !string.IsNullOrWhiteSpace(geoTypeText)
                 ? geoTypeText.ToUpperInvariant()
-                : GeoTypes.Zip;
+                : defaultGeoType;
 
             var source = TryGet(values, headerIndex, "Source", out var sourceText) && !string.IsNullOrWhiteSpace(sourceText)
                 ? sourceText
                 : "HUD";
+
+            var retrievedAt = now;
+            if (TryGet(values, headerIndex, "RetrievedAt", out var retrievedText) &&
+                DateTimeOffset.TryParse(retrievedText, out var parsedRetrieved))
+            {
+                retrievedAt = parsedRetrieved;
+            }
 
             var existing = await _dbContext.HudFairMarketRents.FindAsync(
                 new object[] { geoType, geoKey, year, bedrooms },
@@ -98,7 +117,7 @@ public class HudFmrImportService
                     Bedrooms = bedrooms,
                     Fmr = rent,
                     Source = source,
-                    RetrievedAt = now
+                    RetrievedAt = retrievedAt
                 };
                 _dbContext.HudFairMarketRents.Add(existing);
             }
@@ -106,7 +125,7 @@ public class HudFmrImportService
             {
                 existing.Fmr = rent;
                 existing.Source = source;
-                existing.RetrievedAt = now;
+                existing.RetrievedAt = retrievedAt;
             }
 
             processed += 1;

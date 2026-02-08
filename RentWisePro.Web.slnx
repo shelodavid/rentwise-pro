@@ -3,6 +3,7 @@
   <Project Path="Etl/RentWisePro.Etl.csproj" />
   <Project Path="Etl.Core/RentWisePro.Etl.Core.csproj" />
   <Project Path="Etl.Persistence/RentWisePro.Etl.Persistence.csproj" />
+  <Project Path="Etl.ReferenceData/RentWisePro.Etl.ReferenceData.csproj" />
   <Project Path="Etl.Sources/RentWisePro.Etl.Sources.csproj" />
   <Project Path="Etl.Tests/RentWisePro.Etl.Tests.csproj" />
 </Solution>

@@ -40,7 +40,7 @@ public class HudFmrRentEstimator : IRentEstimator
         }
 
         var latestYear = await _dbContext.HudFairMarketRents
-            .Where(row => row.GeoCode == zip)
+            .Where(row => row.GeoType == GeoTypes.Zip && row.GeoKey == zip)
             .MaxAsync(row => (int?)row.Year, cancellationToken);
 
         if (!latestYear.HasValue)
@@ -49,7 +49,7 @@ public class HudFmrRentEstimator : IRentEstimator
         }
 
         var maxBedrooms = await _dbContext.HudFairMarketRents
-            .Where(row => row.GeoCode == zip && row.Year == latestYear.Value)
+            .Where(row => row.GeoType == GeoTypes.Zip && row.GeoKey == zip && row.Year == latestYear.Value)
             .MaxAsync(row => (int?)row.Bedrooms, cancellationToken);
 
         if (!maxBedrooms.HasValue)
@@ -59,7 +59,10 @@ public class HudFmrRentEstimator : IRentEstimator
 
         var targetBedrooms = Math.Min(roundedBedrooms, maxBedrooms.Value);
         var row = await _dbContext.HudFairMarketRents.FirstOrDefaultAsync(
-            entry => entry.GeoCode == zip && entry.Year == latestYear.Value && entry.Bedrooms == targetBedrooms,
+            entry => entry.GeoType == GeoTypes.Zip
+                     && entry.GeoKey == zip
+                     && entry.Year == latestYear.Value
+                     && entry.Bedrooms == targetBedrooms,
             cancellationToken);
 
         if (row is null)
@@ -68,6 +71,6 @@ public class HudFmrRentEstimator : IRentEstimator
             return null;
         }
 
-        return new RentEstimate(row.FmrMonthlyRent, row.Source, row.ImportedAt);
+        return new RentEstimate(row.Fmr, row.Source, row.RetrievedAt);
     }
 }

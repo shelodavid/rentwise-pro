@@ -51,17 +51,33 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.HasIndex("NormalizedAddressHash").IsUnique();
         });
 
+        modelBuilder.Entity("RentWisePro.Etl.Core.Entities.GeoMarketStat", entity =>
+        {
+            entity.ToTable("geo_market_stats");
+            entity.HasKey("GeoType", "GeoKey", "Year");
+            entity.Property<string>("GeoType").HasMaxLength(20);
+            entity.Property<string>("GeoKey").HasMaxLength(20);
+            entity.Property<int>("Year");
+            entity.Property<decimal>("VacancyRate").HasColumnType("decimal(6,3)");
+            entity.Property<decimal>("MedianHouseholdIncome").HasColumnType("decimal(18,2)");
+            entity.Property<string>("Source").HasMaxLength(50).HasDefaultValue("ACS");
+            entity.Property<DateTimeOffset>("RetrievedAt");
+            entity.HasIndex("GeoType", "GeoKey", "Year");
+        });
+
         modelBuilder.Entity("RentWisePro.Etl.Core.Entities.HudFairMarketRent", entity =>
         {
             entity.ToTable("hud_fmr");
-            entity.HasKey("Year", "GeoCode", "Bedrooms");
+            entity.HasKey("GeoType", "GeoKey", "Year", "Bedrooms");
+            entity.Property<string>("GeoType").HasMaxLength(20);
+            entity.Property<string>("GeoKey").HasMaxLength(20);
             entity.Property<int>("Year");
-            entity.Property<string>("GeoCode").HasMaxLength(20);
             entity.Property<int>("Bedrooms");
-            entity.Property<decimal>("FmrMonthlyRent").HasColumnType("decimal(18,2)");
+            entity.Property<decimal>("Fmr").HasColumnType("decimal(18,2)");
             entity.Property<string>("Source").HasMaxLength(50).HasDefaultValue("HUD");
-            entity.Property<DateTimeOffset>("ImportedAt");
-            entity.HasIndex("GeoCode", "Year");
+            entity.Property<DateTimeOffset>("RetrievedAt");
+            entity.HasIndex("GeoType", "GeoKey", "Year");
+            entity.HasIndex("GeoType", "GeoKey", "Year", "Bedrooms");
         });
 
         modelBuilder.Entity("RentWisePro.Etl.Core.Entities.RawPayloadRef", entity =>
