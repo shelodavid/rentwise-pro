@@ -5,6 +5,7 @@ using RentWisePro.Web.Models.Identity;
 using RentWisePro.Web.Services;
 using RentWisePro.Web.Services.Etl;
 using RentWisePro.Web.Services.Identity;
+using RentWisePro.Web.Services.MarketData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,8 @@ builder.Services.AddScoped<ClosingDisclosureCalculationService>();
 builder.Services.AddScoped<InvestmentProfileResolver>();
 builder.Services.AddScoped<IEtlControlService, LocalEtlControlService>();
 builder.Services.AddScoped<EtlOpsMetricsService>();
+builder.Services.AddScoped<CompositeScoreCalculator>();
+builder.Services.AddScoped<IGeoMarketDataLookup, NullGeoMarketDataLookup>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
