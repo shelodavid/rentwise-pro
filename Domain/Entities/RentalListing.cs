@@ -37,6 +37,18 @@ namespace RentWisePro.Web.Domain.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal? EstimatedRent { get; set; }
 
+        [Column(TypeName = "decimal(18,6)")]
+        public decimal? Rpr { get; set; }
+
+        [Column(TypeName = "decimal(18,4)")]
+        public decimal? Grm { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? CashFlow { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? PricePerSqft { get; set; }
+
         [Column(TypeName = "decimal(18,2)")]
         public decimal? TaxAssessedValue { get; set; }
 

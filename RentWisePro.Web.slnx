@@ -6,4 +6,5 @@
   <Project Path="Etl.ReferenceData/RentWisePro.Etl.ReferenceData.csproj" />
   <Project Path="Etl.Sources/RentWisePro.Etl.Sources.csproj" />
   <Project Path="Etl.Tests/RentWisePro.Etl.Tests.csproj" />
+  <Project Path="RentWisePro.Web.Tests/RentWisePro.Web.Tests.csproj" />
 </Solution>

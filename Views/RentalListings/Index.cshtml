@@ -60,6 +60,10 @@
                         </div>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="minRpr">Min RPR (%)</label>
+                        <input class="form-control" id="minRpr" name="minRpr" value="@(Model.MinRpr?.ToString() ?? string.Empty)" placeholder="1.0" type="number" min="0" step="0.1" />
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="propertyType">Property type</label>
                         <select class="form-select" id="propertyType" name="propertyType">
                             <option value="">All types</option>
@@ -72,11 +76,32 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="vacancyBucket">Vacancy</label>
+                        <select class="form-select" id="vacancyBucket" name="vacancyBucket">
+                            <option value="">All</option>
+                            <option value="low" selected="@(Model.VacancyBucket == "low")">Low (≤ 5%)</option>
+                            <option value="medium" selected="@(Model.VacancyBucket == "medium")">Medium (5–9%)</option>
+                            <option value="high" selected="@(Model.VacancyBucket == "high")">High (≥ 10%)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="affordabilityBucket">Affordability</label>
+                        <select class="form-select" id="affordabilityBucket" name="affordabilityBucket">
+                            <option value="">All</option>
+                            <option value="high" selected="@(Model.AffordabilityBucket == "high")">High</option>
+                            <option value="medium" selected="@(Model.AffordabilityBucket == "medium")">Medium</option>
+                            <option value="low" selected="@(Model.AffordabilityBucket == "low")">Low</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="sortBy">Sort by</label>
                         <select class="form-select" id="sortBy" name="sortBy">
                             <option value="recent" selected="@(Model.SortBy == "recent")">Newest</option>
                             <option value="price" selected="@(Model.SortBy == "price")">Price</option>
                             <option value="rpr" selected="@(Model.SortBy == "rpr")">RPR</option>
+                            <option value="cashflow" selected="@(Model.SortBy == "cashflow")">Cash Flow</option>
+                            <option value="score" selected="@(Model.SortBy == "score")">Score</option>
+                            <option value="lastseen" selected="@(Model.SortBy == "lastseen")">Last seen</option>
                         </select>
                     </div>
                     <div class="d-grid gap-2">
@@ -132,9 +157,37 @@
                                 <span>@(listing.Bathrooms?.ToString("0.0") ?? "—") ba</span>
                                 <span>@(listing.PropertyType ?? "Property type")</span>
                             </div>
-                            <div class="listing-meta text-muted small">
-                                <span>Est Rent: @(listing.EstimatedMonthlyRent.HasValue ? $"{listing.EstimatedMonthlyRent.Value:C0}/mo" : "—")</span>
+                            <div class="listing-metrics text-muted small">
                                 <span>RPR: @(listing.RentToPriceRatioMonthlyPct ?? "—")</span>
+                                <span>GRM: @(listing.Grm.HasValue ? listing.Grm.Value.ToString("0.0") : "—")</span>
+                                <span>Rent: @(listing.EstimatedMonthlyRent.HasValue ? $"{listing.EstimatedMonthlyRent.Value:C0}/mo" : "—")</span>
+                                <span>CashFlow: @(listing.CashFlow.HasValue ? listing.CashFlow.Value.ToString("C0") : "—")</span>
+                                <span title="@listing.CompositeScoreTooltip">Score: @(listing.CompositeScore.HasValue ? listing.CompositeScore.Value.ToString("0") : "—")</span>
+                            </div>
+                            <div class="listing-meta text-muted small">
+                                <span>
+                                    Vacancy:
+                                    @if (!string.IsNullOrEmpty(listing.VacancyBucket))
+                                    {
+                                        <span class="badge @listing.VacancyBadgeClass">@listing.VacancyBucketLabel</span>
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </span>
+                                <span>
+                                    Affordability:
+                                    @if (listing.AffordabilityIndex.HasValue)
+                                    {
+                                        @($"{listing.AffordabilityIndex.Value:0}{(listing.AffordabilityBucketLabel != null ? $" ({listing.AffordabilityBucketLabel})" : string.Empty)}")
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </span>
+                                <span>Rent vs FMR: @(listing.RentVsFmrDeltaPct.HasValue ? $"{listing.RentVsFmrDeltaPct.Value:+0.0%;-0.0%}" : "—")</span>
                             </div>
                             <div class="listing-actions">
                                 <form asp-controller="SavedProperties" asp-action="StartAnalysis" method="post" class="d-grid">
@@ -164,7 +217,10 @@
                            asp-route-maxPrice="@Model.MaxPrice"
                            asp-route-minBedrooms="@Model.MinBedrooms"
                            asp-route-minBathrooms="@Model.MinBathrooms"
+                           asp-route-minRpr="@Model.MinRpr"
                            asp-route-propertyType="@Model.PropertyType"
+                           asp-route-vacancyBucket="@Model.VacancyBucket"
+                           asp-route-affordabilityBucket="@Model.AffordabilityBucket"
                            asp-route-sortBy="@Model.SortBy">
                             Previous
                         </a>
@@ -181,7 +237,10 @@
                                asp-route-maxPrice="@Model.MaxPrice"
                                asp-route-minBedrooms="@Model.MinBedrooms"
                                asp-route-minBathrooms="@Model.MinBathrooms"
+                               asp-route-minRpr="@Model.MinRpr"
                                asp-route-propertyType="@Model.PropertyType"
+                               asp-route-vacancyBucket="@Model.VacancyBucket"
+                               asp-route-affordabilityBucket="@Model.AffordabilityBucket"
                                asp-route-sortBy="@Model.SortBy">
                                 @pageIndex
                             </a>
@@ -197,7 +256,10 @@
                            asp-route-maxPrice="@Model.MaxPrice"
                            asp-route-minBedrooms="@Model.MinBedrooms"
                            asp-route-minBathrooms="@Model.MinBathrooms"
+                           asp-route-minRpr="@Model.MinRpr"
                            asp-route-propertyType="@Model.PropertyType"
+                           asp-route-vacancyBucket="@Model.VacancyBucket"
+                           asp-route-affordabilityBucket="@Model.AffordabilityBucket"
                            asp-route-sortBy="@Model.SortBy">
                             Next
                         </a>
