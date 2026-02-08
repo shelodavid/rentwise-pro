@@ -21,8 +21,10 @@
     <Compile Remove="Etl/**" />
     <Compile Remove="Etl.Core/**" />
     <Compile Remove="Etl.Persistence/**" />
+    <Compile Remove="Etl.ReferenceData/**" />
     <Compile Remove="Etl.Sources/**" />
     <Compile Remove="Etl.Tests/**" />
+    <Compile Remove="RentWisePro.Web.Tests/**" />
   </ItemGroup>
 
 </Project>
