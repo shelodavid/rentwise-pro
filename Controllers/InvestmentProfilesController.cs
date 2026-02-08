@@ -122,27 +122,18 @@ namespace RentWisePro.Web.Controllers
                 return NotFound();
             }
 
-            await ClearDefaultFlag(profile.Id, userId);
+            await using var transaction = await _dbContext.Database
+                .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+
+            await _dbContext.InvestmentProfiles
+                .Where(item => item.UserId == userId && item.IsDefault)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.IsDefault, false));
+
             profile.IsDefault = true;
 
             await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private async Task ClearDefaultFlag(int? ignoreId, string userId)
-        {
-            var defaultsQuery = _dbContext.InvestmentProfiles
-                .Where(item => item.UserId == userId && item.IsDefault);
-            if (ignoreId.HasValue)
-            {
-                defaultsQuery = defaultsQuery.Where(item => item.Id != ignoreId.Value);
-            }
-
-            var defaults = await defaultsQuery.ToListAsync();
-            foreach (var existing in defaults)
-            {
-                existing.IsDefault = false;
-            }
         }
 
         private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
