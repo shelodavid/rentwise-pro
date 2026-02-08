@@ -155,42 +155,6 @@ namespace RentWisePro.Web.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("RentWisePro.Web.Domain.Entities.Etl.EtlAdminAction", b =>
-                {
-                    b.Property<Guid>("ActionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ActionType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Command")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("FinishedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RequestedByUserId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTimeOffset>("StartedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("ActionId");
-
-                    b.ToTable("etl_admin_actions");
-                });
-
             modelBuilder.Entity("RentWisePro.Web.Domain.Entities.InvestmentProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -325,8 +289,14 @@ namespace RentWisePro.Web.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal?>("CashFlow")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal?>("EstimatedRent")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Grm")
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("ImgSrc")
                         .HasMaxLength(1000)
@@ -340,9 +310,15 @@ namespace RentWisePro.Web.Migrations
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal?>("PricePerSqft")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("PropertyType")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("Rpr")
+                        .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("SourceSystem")
                         .HasMaxLength(50)
