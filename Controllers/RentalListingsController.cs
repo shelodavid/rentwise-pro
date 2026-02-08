@@ -29,6 +29,7 @@ namespace RentWisePro.Web.Controllers
             int? minBedrooms,
             decimal? minBathrooms,
             string? propertyType,
+            string? sortBy,
             int page = 1,
             int? pageSize = null)
         {
@@ -97,10 +98,7 @@ namespace RentWisePro.Web.Controllers
                 listingsQuery = listingsQuery.Where(listing => listing.Bathrooms >= normalizedMinBathrooms);
             }
 
-            listingsQuery = listingsQuery
-                .OrderByDescending(listing => listing.IngestedAtUtc)
-                .ThenByDescending(listing => listing.Price)
-                .ThenBy(listing => listing.RentalListingId);
+            listingsQuery = ApplySorting(listingsQuery, sortBy);
 
             var totalCount = await listingsQuery.CountAsync();
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)normalizedPageSize));
@@ -119,12 +117,24 @@ namespace RentWisePro.Web.Controllers
                     ZipCode = listing.ZipCode,
                     PropertyType = listing.PropertyType,
                     Price = listing.Price,
+                    EstimatedMonthlyRent = listing.EstimatedRent, // TODO: Populate EstimatedRent via ETL.
                     Bedrooms = listing.Bedrooms,
                     Bathrooms = listing.Bathrooms,
                     ImgSrc = listing.ImgSrc,
                     IngestedAtUtc = listing.IngestedAtUtc
                 })
                 .ToListAsync();
+
+            foreach (var listing in listings)
+            {
+                if (listing.Price.HasValue
+                    && listing.Price.Value > 0
+                    && listing.EstimatedMonthlyRent.HasValue)
+                {
+                    listing.RentToPriceRatioMonthly = listing.EstimatedMonthlyRent.Value / listing.Price.Value;
+                    listing.RentToPriceRatioMonthlyPct = listing.RentToPriceRatioMonthly.Value.ToString("0.00%");
+                }
+            }
 
             var propertyTypes = await _dbContext.RentalListings
                 .AsNoTracking()
@@ -146,6 +156,7 @@ namespace RentWisePro.Web.Controllers
                 MinBedrooms = normalizedMinBedrooms,
                 MinBathrooms = normalizedMinBathrooms,
                 PropertyType = propertyType,
+                SortBy = NormalizeSortBy(sortBy),
                 Page = normalizedPage,
                 PageSize = normalizedPageSize,
                 TotalPages = totalPages,
@@ -173,6 +184,44 @@ namespace RentWisePro.Web.Controllers
         private static int? NormalizeNonNegative(int? value)
         {
             return value.HasValue && value.Value >= 0 ? value : null;
+        }
+
+        private static string NormalizeSortBy(string? sortBy)
+        {
+            return sortBy?.Trim().ToLowerInvariant() switch
+            {
+                "price" => "price",
+                "rpr" => "rpr",
+                _ => "recent"
+            };
+        }
+
+        private static IQueryable<Domain.Entities.RentalListing> ApplySorting(
+            IQueryable<Domain.Entities.RentalListing> listingsQuery,
+            string? sortBy)
+        {
+            return NormalizeSortBy(sortBy) switch
+            {
+                "price" => listingsQuery
+                    .OrderByDescending(listing => listing.Price)
+                    .ThenByDescending(listing => listing.IngestedAtUtc)
+                    .ThenBy(listing => listing.RentalListingId),
+                "rpr" => listingsQuery
+                    .OrderByDescending(listing =>
+                        listing.EstimatedRent.HasValue
+                        && listing.Price.HasValue
+                        && listing.Price.Value > 0
+                            ? listing.EstimatedRent.Value / listing.Price.Value
+                            : (decimal?)null)
+                    .ThenByDescending(listing => listing.EstimatedRent)
+                    .ThenByDescending(listing => listing.Price)
+                    .ThenByDescending(listing => listing.IngestedAtUtc)
+                    .ThenBy(listing => listing.RentalListingId),
+                _ => listingsQuery
+                    .OrderByDescending(listing => listing.IngestedAtUtc)
+                    .ThenByDescending(listing => listing.Price)
+                    .ThenBy(listing => listing.RentalListingId)
+            };
         }
     }
 }

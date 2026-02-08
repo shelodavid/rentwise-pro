@@ -71,6 +71,14 @@
                             }
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="sortBy">Sort by</label>
+                        <select class="form-select" id="sortBy" name="sortBy">
+                            <option value="recent" selected="@(Model.SortBy == "recent")">Newest</option>
+                            <option value="price" selected="@(Model.SortBy == "price")">Price</option>
+                            <option value="rpr" selected="@(Model.SortBy == "rpr")">RPR</option>
+                        </select>
+                    </div>
                     <div class="d-grid gap-2">
                         <button class="btn btn-primary" type="submit">Apply filters</button>
                         <a class="btn btn-outline-secondary" asp-controller="RentalListings" asp-action="Index">Clear filters</a>
@@ -124,6 +132,10 @@
                                 <span>@(listing.Bathrooms?.ToString("0.0") ?? "—") ba</span>
                                 <span>@(listing.PropertyType ?? "Property type")</span>
                             </div>
+                            <div class="listing-meta text-muted small">
+                                <span>Est Rent: @(listing.EstimatedMonthlyRent.HasValue ? $"{listing.EstimatedMonthlyRent.Value:C0}/mo" : "—")</span>
+                                <span>RPR: @(listing.RentToPriceRatioMonthlyPct ?? "—")</span>
+                            </div>
                             <div class="listing-actions">
                                 <form asp-controller="SavedProperties" asp-action="StartAnalysis" method="post" class="d-grid">
                                     @Html.AntiForgeryToken()
@@ -152,7 +164,8 @@
                            asp-route-maxPrice="@Model.MaxPrice"
                            asp-route-minBedrooms="@Model.MinBedrooms"
                            asp-route-minBathrooms="@Model.MinBathrooms"
-                           asp-route-propertyType="@Model.PropertyType">
+                           asp-route-propertyType="@Model.PropertyType"
+                           asp-route-sortBy="@Model.SortBy">
                             Previous
                         </a>
                     </li>
@@ -168,7 +181,8 @@
                                asp-route-maxPrice="@Model.MaxPrice"
                                asp-route-minBedrooms="@Model.MinBedrooms"
                                asp-route-minBathrooms="@Model.MinBathrooms"
-                               asp-route-propertyType="@Model.PropertyType">
+                               asp-route-propertyType="@Model.PropertyType"
+                               asp-route-sortBy="@Model.SortBy">
                                 @pageIndex
                             </a>
                         </li>
@@ -183,7 +197,8 @@
                            asp-route-maxPrice="@Model.MaxPrice"
                            asp-route-minBedrooms="@Model.MinBedrooms"
                            asp-route-minBathrooms="@Model.MinBathrooms"
-                           asp-route-propertyType="@Model.PropertyType">
+                           asp-route-propertyType="@Model.PropertyType"
+                           asp-route-sortBy="@Model.SortBy">
                             Next
                         </a>
                     </li>

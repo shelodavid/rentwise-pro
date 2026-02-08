@@ -14,6 +14,7 @@ namespace RentWisePro.Web.Models
         public int? MinBedrooms { get; set; }
         public decimal? MinBathrooms { get; set; }
         public string? PropertyType { get; set; }
+        public string? SortBy { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int TotalPages { get; set; }
@@ -32,6 +33,9 @@ namespace RentWisePro.Web.Models
         public string? ZipCode { get; set; }
         public string? PropertyType { get; set; }
         public decimal? Price { get; set; }
+        public decimal? EstimatedMonthlyRent { get; set; }
+        public decimal? RentToPriceRatioMonthly { get; set; }
+        public string? RentToPriceRatioMonthlyPct { get; set; }
         public int? Bedrooms { get; set; }
         public decimal? Bathrooms { get; set; }
         public string? ImgSrc { get; set; }
