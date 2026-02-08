@@ -115,7 +115,14 @@ public class EtlRepository : IEtlRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<ListingUpsertResult> UpsertListingAsync(Property property, string source, SourceListing listing, string materialHash, DateTimeOffset seenAt, CancellationToken cancellationToken)
+    public async Task<ListingUpsertResult> UpsertListingAsync(
+        Property property,
+        string source,
+        SourceListing listing,
+        string materialHash,
+        DateTimeOffset seenAt,
+        ListingInvestmentMetrics metrics,
+        CancellationToken cancellationToken)
     {
         var existing = await _dbContext.Listings
             .FirstOrDefaultAsync(l => l.Source == source && l.SourceListingId == listing.SourceListingId, cancellationToken);
@@ -125,6 +132,12 @@ public class EtlRepository : IEtlRepository
             var previousHash = existing.MaterialHash;
             existing.Status = listing.Status ?? existing.Status;
             existing.Price = listing.Price ?? existing.Price;
+            existing.EstimatedRent = metrics.EstimatedRent;
+            existing.RprMonthly = metrics.RprMonthly;
+            existing.Grm = metrics.Grm;
+            existing.EstimatedCashFlow = metrics.EstimatedCashFlow;
+            existing.AffordabilityIndex = metrics.AffordabilityIndex;
+            existing.PricePerSqft = metrics.PricePerSqft;
             existing.LastSeenAt = seenAt;
             existing.MaterialHash = materialHash;
             existing.MissingRuns = 0;
@@ -141,6 +154,12 @@ public class EtlRepository : IEtlRepository
             SourceListingId = listing.SourceListingId,
             Status = listing.Status ?? "active",
             Price = listing.Price,
+            EstimatedRent = metrics.EstimatedRent,
+            RprMonthly = metrics.RprMonthly,
+            Grm = metrics.Grm,
+            EstimatedCashFlow = metrics.EstimatedCashFlow,
+            AffordabilityIndex = metrics.AffordabilityIndex,
+            PricePerSqft = metrics.PricePerSqft,
             Currency = "USD",
             FirstSeenAt = seenAt,
             LastSeenAt = seenAt,

@@ -12,6 +12,7 @@ public class EtlDbContext : DbContext
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<HudFairMarketRent> HudFairMarketRents => Set<HudFairMarketRent>();
     public DbSet<Listing> Listings => Set<Listing>();
+    public DbSet<ListingMetricSnapshot> ListingMetricSnapshots => Set<ListingMetricSnapshot>();
     public DbSet<ListingSnapshot> ListingSnapshots => Set<ListingSnapshot>();
     public DbSet<RawPayloadRef> RawPayloadRefs => Set<RawPayloadRef>();
     public DbSet<PropertyPhoto> PropertyPhotos => Set<PropertyPhoto>();
@@ -60,7 +61,13 @@ public class EtlDbContext : DbContext
             entity.Property(e => e.Source).HasMaxLength(100).IsRequired();
             entity.Property(e => e.SourceListingId).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Price).HasColumnType("decimal(18,0)");
+            entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.EstimatedRent).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.RprMonthly).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.Grm).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.EstimatedCashFlow).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.AffordabilityIndex).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.PricePerSqft).HasColumnType("decimal(18,2)");
             entity.Property(e => e.Currency).HasMaxLength(10).HasDefaultValue("USD");
             entity.Property(e => e.MaterialHash).HasMaxLength(128).IsRequired();
             entity.HasIndex(e => new { e.Source, e.SourceListingId }).IsUnique();
@@ -69,12 +76,27 @@ public class EtlDbContext : DbContext
             entity.HasIndex(e => e.LastSeenAt);
         });
 
+        modelBuilder.Entity<ListingMetricSnapshot>(entity =>
+        {
+            entity.ToTable("listing_metric_snapshots");
+            entity.HasKey(e => e.MetricSnapshotId);
+            entity.Property(e => e.EstimatedRent).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.RprMonthly).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.Grm).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.EstimatedCashFlow).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.AffordabilityIndex).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.FmrUsed).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.VacancyRateUsed).HasColumnType("decimal(5,4)");
+            entity.Property(e => e.Score).HasColumnType("decimal(18,6)");
+            entity.HasIndex(e => new { e.ListingId, e.AsOf });
+        });
+
         modelBuilder.Entity<ListingSnapshot>(entity =>
         {
             entity.ToTable("listing_snapshots");
             entity.HasKey(e => e.SnapshotId);
             entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.Price).HasColumnType("decimal(18,0)");
+            entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
             entity.Property(e => e.MaterialHash).HasMaxLength(128).IsRequired();
             entity.HasIndex(e => new { e.ListingId, e.ScrapedAt });
         });
@@ -141,6 +163,12 @@ public class EtlDbContext : DbContext
         modelBuilder.Entity<ListingSnapshot>()
             .HasOne(e => e.Listing)
             .WithMany(l => l.Snapshots)
+            .HasForeignKey(e => e.ListingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ListingMetricSnapshot>()
+            .HasOne(e => e.Listing)
+            .WithMany()
             .HasForeignKey(e => e.ListingId)
             .OnDelete(DeleteBehavior.Cascade);
 

@@ -52,10 +52,12 @@ builder.Services.AddSingleton<AddressNormalizer>();
 builder.Services.AddSingleton<HashingService>();
 builder.Services.AddSingleton<MaterialHashBuilder>();
 builder.Services.AddSingleton<SnapshotDecider>();
+builder.Services.AddSingleton<InvestmentMetricCalculator>();
 
 builder.Services.AddScoped<IEtlRepository, EtlRepository>();
 builder.Services.AddScoped<IRentEstimator, HudFmrRentEstimator>();
 builder.Services.AddScoped<IRentEstimator, FixtureRentEstimator>();
+builder.Services.AddScoped<IMedianIncomeLookup, NullMedianIncomeLookup>();
 builder.Services.AddScoped<HudFmrImportService>();
 
 builder.Services.AddHttpClient<RapidApiClient>();

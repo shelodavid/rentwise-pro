@@ -13,10 +13,12 @@ public class EtlOrchestrator : IEtlOrchestrator
     private readonly IEtlRepository _repository;
     private readonly IRawPayloadStore _rawPayloadStore;
     private readonly IReadOnlyList<IRentEstimator> _rentEstimators;
+    private readonly IMedianIncomeLookup _medianIncomeLookup;
     private readonly AddressNormalizer _addressNormalizer;
     private readonly HashingService _hashingService;
     private readonly MaterialHashBuilder _materialHashBuilder;
     private readonly SnapshotDecider _snapshotDecider;
+    private readonly InvestmentMetricCalculator _metricCalculator;
     private readonly EtlOptions _etlOptions;
     private readonly ILogger<EtlOrchestrator> _logger;
 
@@ -25,10 +27,12 @@ public class EtlOrchestrator : IEtlOrchestrator
         IEtlRepository repository,
         IRawPayloadStore rawPayloadStore,
         IEnumerable<IRentEstimator> rentEstimators,
+        IMedianIncomeLookup medianIncomeLookup,
         AddressNormalizer addressNormalizer,
         HashingService hashingService,
         MaterialHashBuilder materialHashBuilder,
         SnapshotDecider snapshotDecider,
+        InvestmentMetricCalculator metricCalculator,
         IOptions<EtlOptions> etlOptions,
         ILogger<EtlOrchestrator> logger)
     {
@@ -36,10 +40,12 @@ public class EtlOrchestrator : IEtlOrchestrator
         _repository = repository;
         _rawPayloadStore = rawPayloadStore;
         _rentEstimators = rentEstimators.OrderBy(estimator => estimator.Priority).ToList();
+        _medianIncomeLookup = medianIncomeLookup;
         _addressNormalizer = addressNormalizer;
         _hashingService = hashingService;
         _materialHashBuilder = materialHashBuilder;
         _snapshotDecider = snapshotDecider;
+        _metricCalculator = metricCalculator;
         _etlOptions = etlOptions.Value;
         _logger = logger;
     }
@@ -110,8 +116,17 @@ public class EtlOrchestrator : IEtlOrchestrator
                         var property = await _repository.GetOrCreatePropertyAsync(listing, normalizedAddress, addressHash, cancellationToken);
                         await EnsureRentEstimateAsync(property, cancellationToken);
 
+                        var medianMonthlyIncome = await _medianIncomeLookup.GetMedianMonthlyIncomeAsync(property, cancellationToken);
+                        var metrics = _metricCalculator.Calculate(listing, property, medianMonthlyIncome);
                         var materialHash = _materialHashBuilder.Build(listing);
-                        var listingResult = await _repository.UpsertListingAsync(property, source.Name, listing, materialHash, DateTimeOffset.UtcNow, cancellationToken);
+                        var listingResult = await _repository.UpsertListingAsync(
+                            property,
+                            source.Name,
+                            listing,
+                            materialHash,
+                            DateTimeOffset.UtcNow,
+                            metrics,
+                            cancellationToken);
                         stats.ListingsUpserted += 1;
 
                         if (_snapshotDecider.ShouldCreateSnapshot(listingResult.PreviousMaterialHash, materialHash))

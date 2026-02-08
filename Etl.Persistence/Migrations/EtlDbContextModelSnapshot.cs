@@ -97,7 +97,13 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.Property<string>("Source").HasMaxLength(100);
             entity.Property<string>("SourceListingId").HasMaxLength(200);
             entity.Property<string>("Status").HasMaxLength(50);
-            entity.Property<decimal?>("Price").HasColumnType("decimal(18,0)");
+            entity.Property<decimal?>("Price").HasColumnType("decimal(18,2)");
+            entity.Property<decimal?>("EstimatedRent").HasColumnType("decimal(18,2)");
+            entity.Property<decimal?>("RprMonthly").HasColumnType("decimal(18,6)");
+            entity.Property<decimal?>("Grm").HasColumnType("decimal(18,6)");
+            entity.Property<decimal?>("EstimatedCashFlow").HasColumnType("decimal(18,2)");
+            entity.Property<decimal?>("AffordabilityIndex").HasColumnType("decimal(18,6)");
+            entity.Property<decimal?>("PricePerSqft").HasColumnType("decimal(18,2)");
             entity.Property<string>("Currency").HasMaxLength(10).HasDefaultValue("USD");
             entity.Property<DateTimeOffset>("FirstSeenAt");
             entity.Property<DateTimeOffset>("LastSeenAt");
@@ -110,6 +116,25 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.HasIndex("Status");
             entity.HasIndex("LastSeenAt");
             entity.HasIndex("Source", "SourceListingId").IsUnique();
+        });
+
+        modelBuilder.Entity("RentWisePro.Etl.Core.Entities.ListingMetricSnapshot", entity =>
+        {
+            entity.ToTable("listing_metric_snapshots");
+            entity.HasKey("MetricSnapshotId");
+            entity.Property<Guid>("MetricSnapshotId");
+            entity.Property<Guid>("ListingId");
+            entity.Property<DateTimeOffset>("AsOf");
+            entity.Property<decimal?>("EstimatedRent").HasColumnType("decimal(18,2)");
+            entity.Property<decimal?>("RprMonthly").HasColumnType("decimal(18,6)");
+            entity.Property<decimal?>("Grm").HasColumnType("decimal(18,6)");
+            entity.Property<decimal?>("EstimatedCashFlow").HasColumnType("decimal(18,2)");
+            entity.Property<decimal?>("AffordabilityIndex").HasColumnType("decimal(18,6)");
+            entity.Property<decimal?>("FmrUsed").HasColumnType("decimal(18,2)");
+            entity.Property<decimal?>("VacancyRateUsed").HasColumnType("decimal(5,4)");
+            entity.Property<decimal?>("Score").HasColumnType("decimal(18,6)");
+            entity.Property<int?>("ScoreVersion");
+            entity.HasIndex("ListingId", "AsOf");
         });
 
         modelBuilder.Entity("RentWisePro.Etl.Core.Entities.PropertyPhoto", entity =>
@@ -168,7 +193,7 @@ public class EtlDbContextModelSnapshot : ModelSnapshot
             entity.Property<Guid>("SnapshotId");
             entity.Property<Guid>("ListingId");
             entity.Property<string>("Status").HasMaxLength(50);
-            entity.Property<decimal?>("Price").HasColumnType("decimal(18,0)");
+            entity.Property<decimal?>("Price").HasColumnType("decimal(18,2)");
             entity.Property<string>("MaterialHash").HasMaxLength(128);
             entity.Property<DateTimeOffset>("ScrapedAt");
             entity.Property<string>("RawRef");

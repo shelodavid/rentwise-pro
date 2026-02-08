@@ -10,6 +10,7 @@ public class SourceListing
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
     public decimal? Price { get; set; }
+    public decimal? MonthlyRent { get; set; }
     public decimal? Beds { get; set; }
     public decimal? Baths { get; set; }
     public int? SquareFeet { get; set; }
