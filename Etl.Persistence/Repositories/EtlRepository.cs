@@ -106,6 +106,15 @@ public class EtlRepository : IEtlRepository
         return property;
     }
 
+    public async Task UpdateRentEstimateAsync(Property property, RentEstimate estimate, CancellationToken cancellationToken)
+    {
+        property.EstimatedMonthlyRent = estimate.MonthlyRent;
+        property.RentEstimateSource = estimate.Source;
+        property.RentEstimateAsOf = estimate.AsOf;
+        property.UpdatedAt = DateTimeOffset.UtcNow;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<ListingUpsertResult> UpsertListingAsync(Property property, string source, SourceListing listing, string materialHash, DateTimeOffset seenAt, CancellationToken cancellationToken)
     {
         var existing = await _dbContext.Listings

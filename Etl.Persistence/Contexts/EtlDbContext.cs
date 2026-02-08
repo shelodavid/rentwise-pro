@@ -10,6 +10,7 @@ public class EtlDbContext : DbContext
     }
 
     public DbSet<Property> Properties => Set<Property>();
+    public DbSet<HudFairMarketRent> HudFairMarketRents => Set<HudFairMarketRent>();
     public DbSet<Listing> Listings => Set<Listing>();
     public DbSet<ListingSnapshot> ListingSnapshots => Set<ListingSnapshot>();
     public DbSet<RawPayloadRef> RawPayloadRefs => Set<RawPayloadRef>();
@@ -37,7 +38,19 @@ public class EtlDbContext : DbContext
             entity.Property(e => e.Baths).HasPrecision(4, 1);
             entity.Property(e => e.Latitude).HasPrecision(9, 6);
             entity.Property(e => e.Longitude).HasPrecision(9, 6);
+            entity.Property(e => e.EstimatedMonthlyRent).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.RentEstimateSource).HasMaxLength(50);
             entity.HasIndex(e => e.NormalizedAddressHash).IsUnique();
+        });
+
+        modelBuilder.Entity<HudFairMarketRent>(entity =>
+        {
+            entity.ToTable("hud_fmr");
+            entity.HasKey(e => new { e.Year, e.GeoCode, e.Bedrooms });
+            entity.Property(e => e.GeoCode).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.FmrMonthlyRent).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Source).HasMaxLength(50).HasDefaultValue("HUD");
+            entity.HasIndex(e => new { e.GeoCode, e.Year });
         });
 
         modelBuilder.Entity<Listing>(entity =>

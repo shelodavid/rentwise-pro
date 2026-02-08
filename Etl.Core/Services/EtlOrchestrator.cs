@@ -12,6 +12,7 @@ public class EtlOrchestrator : IEtlOrchestrator
     private readonly IEnumerable<IListingSource> _sources;
     private readonly IEtlRepository _repository;
     private readonly IRawPayloadStore _rawPayloadStore;
+    private readonly IReadOnlyList<IRentEstimator> _rentEstimators;
     private readonly AddressNormalizer _addressNormalizer;
     private readonly HashingService _hashingService;
     private readonly MaterialHashBuilder _materialHashBuilder;
@@ -23,6 +24,7 @@ public class EtlOrchestrator : IEtlOrchestrator
         IEnumerable<IListingSource> sources,
         IEtlRepository repository,
         IRawPayloadStore rawPayloadStore,
+        IEnumerable<IRentEstimator> rentEstimators,
         AddressNormalizer addressNormalizer,
         HashingService hashingService,
         MaterialHashBuilder materialHashBuilder,
@@ -33,6 +35,7 @@ public class EtlOrchestrator : IEtlOrchestrator
         _sources = sources;
         _repository = repository;
         _rawPayloadStore = rawPayloadStore;
+        _rentEstimators = rentEstimators.OrderBy(estimator => estimator.Priority).ToList();
         _addressNormalizer = addressNormalizer;
         _hashingService = hashingService;
         _materialHashBuilder = materialHashBuilder;
@@ -105,6 +108,7 @@ public class EtlOrchestrator : IEtlOrchestrator
                         var normalizedAddress = _addressNormalizer.Normalize(listing.Address);
                         var addressHash = _hashingService.ComputeSha256($"{normalizedAddress}|{listing.City}|{listing.State}|{listing.Zip}");
                         var property = await _repository.GetOrCreatePropertyAsync(listing, normalizedAddress, addressHash, cancellationToken);
+                        await EnsureRentEstimateAsync(property, cancellationToken);
 
                         var materialHash = _materialHashBuilder.Build(listing);
                         var listingResult = await _repository.UpsertListingAsync(property, source.Name, listing, materialHash, DateTimeOffset.UtcNow, cancellationToken);
@@ -178,6 +182,26 @@ public class EtlOrchestrator : IEtlOrchestrator
         finally
         {
             await _repository.CompleteRunAsync(runId, runStatus, notes.Count > 0 ? string.Join("; ", notes) : null, DateTimeOffset.UtcNow, cancellationToken);
+        }
+    }
+
+    private async Task EnsureRentEstimateAsync(Property property, CancellationToken cancellationToken)
+    {
+        if (property.EstimatedMonthlyRent.HasValue)
+        {
+            return;
+        }
+
+        foreach (var estimator in _rentEstimators)
+        {
+            var estimate = await estimator.EstimateAsync(property, cancellationToken);
+            if (estimate is null)
+            {
+                continue;
+            }
+
+            await _repository.UpdateRentEstimateAsync(property, estimate, cancellationToken);
+            break;
         }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using RentWisePro.Etl.Core.Interfaces;
 using RentWisePro.Etl.Core.Options;
 using RentWisePro.Etl.Core.Services;
@@ -53,6 +54,9 @@ builder.Services.AddSingleton<MaterialHashBuilder>();
 builder.Services.AddSingleton<SnapshotDecider>();
 
 builder.Services.AddScoped<IEtlRepository, EtlRepository>();
+builder.Services.AddScoped<IRentEstimator, HudFmrRentEstimator>();
+builder.Services.AddScoped<IRentEstimator, FixtureRentEstimator>();
+builder.Services.AddScoped<HudFmrImportService>();
 
 builder.Services.AddHttpClient<RapidApiClient>();
 var rapidApiOptions = builder.Configuration.GetSection("RapidApi").Get<RapidApiOptions>() ?? new RapidApiOptions();
@@ -105,6 +109,18 @@ builder.Services.AddHostedService<EtlWorker>();
 builder.Services.AddHostedService<WorkQueueWorker>();
 
 var host = builder.Build();
+var executionOptions = host.Services.GetRequiredService<IOptions<EtlExecutionOptions>>().Value;
+if (executionOptions.ImportHudFmr)
+{
+    using var scope = host.Services.CreateScope();
+    var importer = scope.ServiceProvider.GetRequiredService<HudFmrImportService>();
+    var logger = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>()
+        .CreateLogger("HudFmrImport");
+    var csvPath = Path.Combine(fixtureRootPath, "Hud", "hud_fmr_sample.csv");
+    var imported = await importer.ImportAsync(csvPath, CancellationToken.None);
+    logger.LogInformation("HUD FMR import completed. Rows processed: {Imported}.", imported);
+    return;
+}
 if (useFixtures)
 {
     var logger = host.Services.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>()
@@ -150,6 +166,14 @@ static void ApplyExecutionOptions(EtlExecutionOptions options, string[] args)
         {
             options.QueueOnly = true;
             options.QueueRunOnce = true;
+        }
+        else if (string.Equals(arg, "--importHudFmr", StringComparison.OrdinalIgnoreCase))
+        {
+            options.ImportHudFmr = true;
+        }
+        else if (string.Equals(arg, "--import-hud-fmr", StringComparison.OrdinalIgnoreCase))
+        {
+            options.ImportHudFmr = true;
         }
         else if (arg.StartsWith("--source=", StringComparison.OrdinalIgnoreCase))
         {
