@@ -11,14 +11,14 @@ public class LocalEtlControlService : IEtlControlService
     private const int MaxMessageLength = 4000;
     private static readonly SemaphoreSlim RunnerLock = new(1, 1);
 
-    private readonly RentWiseProDbContext _dbContext;
+    private readonly EtlReadDbContext _dbContext;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<LocalEtlControlService> _logger;
     private readonly IConfiguration _configuration;
     private readonly IServiceScopeFactory _scopeFactory;
 
     public LocalEtlControlService(
-        RentWiseProDbContext dbContext,
+        EtlReadDbContext dbContext,
         IWebHostEnvironment environment,
         ILogger<LocalEtlControlService> logger,
         IConfiguration configuration,
@@ -329,7 +329,7 @@ public class LocalEtlControlService : IEtlControlService
         try
         {
             using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<RentWiseProDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<EtlReadDbContext>();
             var action = await dbContext.EtlAdminActions.FirstOrDefaultAsync(item => item.ActionId == actionId);
             if (action is null)
             {

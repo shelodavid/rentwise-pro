@@ -12,9 +12,9 @@ public class EtlOpsMetricsService
     private static readonly string ProcessingStatus = "processing";
     private static readonly string FailedQueueStatus = "failed";
 
-    private readonly RentWiseProDbContext _dbContext;
+    private readonly EtlReadDbContext _dbContext;
 
-    public EtlOpsMetricsService(RentWiseProDbContext dbContext)
+    public EtlOpsMetricsService(EtlReadDbContext dbContext)
     {
         _dbContext = dbContext;
     }

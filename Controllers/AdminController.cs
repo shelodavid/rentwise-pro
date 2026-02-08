@@ -13,9 +13,9 @@ namespace RentWisePro.Web.Controllers;
 public class AdminController : Controller
 {
     private readonly IEtlControlService _etlControlService;
-    private readonly RentWiseProDbContext _dbContext;
+    private readonly EtlReadDbContext _dbContext;
 
-    public AdminController(IEtlControlService etlControlService, RentWiseProDbContext dbContext)
+    public AdminController(IEtlControlService etlControlService, EtlReadDbContext dbContext)
     {
         _etlControlService = etlControlService;
         _dbContext = dbContext;

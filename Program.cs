@@ -14,6 +14,8 @@ builder.Services.AddDbContext<RentWiseProDbContext>(options =>
     options.UseSqlServer(cs));
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(cs));
+builder.Services.AddDbContext<EtlReadDbContext>(options =>
+    options.UseSqlServer(cs));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
