@@ -19,3 +19,8 @@ Thumbs.db
 # Local dev helper scripts
 run-etl-once.ps1
 
+
+# ETL local runtime output
+Etl/.local/
+Etl/.local/**
+
